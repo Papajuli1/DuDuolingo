@@ -1,4 +1,16 @@
 # Python virtual environment
 /venv
+/.venv
 
+# Python cache
 __pycache__/
+
+# Node.js dependencies
+node_modules/
+
+# React build output
+/frontend/build
+
+# Environment variables
+.env
+
