@@ -120,15 +120,31 @@ Instructions:
         return {"error": f"Error processing group {group_id}: {str(e)}"}
 
 if __name__ == "__main__":
-    # Example usage - process a single group
-    print("Testing single group scene generation...")
-    result = create_scene_with_words(1)
-    if "error" in result:
-        print(f"Error: {result['error']}")
-    else:
-        print(f"Generated scene for Group {result['group_id']}:")
-        print(f"Language: {result['language']}, Level: {result['level']}")
-        print(f"Words: {result['words']}")
-        print(f"Scene: {result['scene']}")
-        print(f"Scene: {result['scene']}")
+    # Process the first 15 groups
+    print("Processing first 15 groups for scene generation...")
     
+    successful_groups = []
+    failed_groups = []
+    
+    for group_id in range(1, 16):
+        print(f"\nProcessing Group {group_id}...")
+        result = create_scene_with_words(group_id)
+        
+        if "error" in result:
+            print(f"Error for Group {group_id}: {result['error']}")
+            failed_groups.append(group_id)
+        else:
+            print(f"✓ Generated scene for Group {result['group_id']}")
+            print(f"  Language: {result['language']}, Level: {result['level']}")
+            print(f"  Words: {result['words']}")
+            print(f"  Scene: {result['scene'][:100]}...")  # Show first 100 chars
+            successful_groups.append(group_id)
+    
+    # Summary
+    print(f"\n{'='*50}")
+    print(f"SUMMARY:")
+    print(f"Successfully processed: {len(successful_groups)} groups")
+    print(f"Failed: {len(failed_groups)} groups")
+    if failed_groups:
+        print(f"Failed group IDs: {failed_groups}")
+    print(f"{'='*50}")

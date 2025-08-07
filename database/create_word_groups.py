@@ -47,17 +47,17 @@ def get_word_groups_exact(language, level, groups_count, words_per_group=5):
 def create_word_groups():
     """
     Create all word groups as specified:
-    - Spanish: 13 groups from each level 1-15 (195 groups)
-    - German: 13 groups from each level 1-5 (65 groups)
-    Total: 260 groups
+    - Spanish: 15 groups from each level 1-15 (225 groups)
+    - German: 15 groups from each level 1-5 (75 groups)
+    Total: 300 groups
     """
     all_groups = []
     
-    # Spanish levels 1-15 (13 groups each)
+    # Spanish levels 1-15 (15 groups each)
     print("Generating Spanish word groups...")
     for level in range(1, 16):
         print(f"  Processing Spanish level {level}")
-        groups = get_word_groups_exact("Spanish", level, 13, 5)
+        groups = get_word_groups_exact("Spanish", level, 15, 5)
         for group_num, group in enumerate(groups, 1):
             group_data = {
                 'language': 'Spanish',
@@ -67,11 +67,11 @@ def create_word_groups():
             }
             all_groups.append(group_data)
     
-    # German levels 1-5 (13 groups each)
+    # German levels 1-5 (15 groups each)
     print("Generating German word groups...")
     for level in range(1, 6):
         print(f"  Processing German level {level}")
-        groups = get_word_groups_exact("German", level, 13, 5)
+        groups = get_word_groups_exact("German", level, 15, 5)
         for group_num, group in enumerate(groups, 1):
             group_data = {
                 'language': 'German',
@@ -125,9 +125,9 @@ def save_groups_to_csv(groups, filename):
 
 if __name__ == "__main__":
     print("Creating all word groups...")
-    print("Spanish: 13 groups per level for levels 1-15 (195 groups)")
-    print("German: 13 groups per level for levels 1-5 (65 groups)")
-    print("Expected total: 260 groups")
+    print("Spanish: 15 groups per level for levels 1-15 (225 groups)")
+    print("German: 15 groups per level for levels 1-5 (75 groups)")
+    print("Expected total: 300 groups")
 
     groups = create_word_groups()
     print(f"\nGenerated {len(groups)} word groups")
@@ -147,15 +147,15 @@ if __name__ == "__main__":
     if spanish_groups:
         spanish_levels = set(g['level'] for g in spanish_groups)
         print(f"  Levels: {sorted(spanish_levels)}")
-        print(f"  Expected: 195 groups (13 × 15 levels)")
+        print(f"  Expected: 225 groups (15 × 15 levels)")
     
     print(f"German groups: {len(german_groups)}")
     if german_groups:
         german_levels = set(g['level'] for g in german_groups)
         print(f"  Levels: {sorted(german_levels)}")
-        print(f"  Expected: 65 groups (13 × 5 levels)")
-        print(f"  Levels: {sorted(spanish_levels)}")
+        print(f"  Expected: 75 groups (15 × 5 levels)")
     
+    print(f"Total groups: {len(groups)}")
     print(f"German groups: {len(german_groups)}")
     if german_groups:
         german_levels = set(g['level'] for g in german_groups)
