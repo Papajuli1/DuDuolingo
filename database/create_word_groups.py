@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from db_helper import get_connection
 
-def get_word_groups_exact(language, level, groups_count, words_per_group=5):
+def get_word_groups_exact(language, level, groups_count, words_per_group=8):
     """
     Get exact number of word groups from the database
     """
@@ -57,7 +57,7 @@ def create_word_groups():
     print("Generating Spanish word groups...")
     for level in range(1, 16):
         print(f"  Processing Spanish level {level}")
-        groups = get_word_groups_exact("Spanish", level, 15, 5)
+        groups = get_word_groups_exact("Spanish", level, 15, 8)
         for group_num, group in enumerate(groups, 1):
             group_data = {
                 'language': 'Spanish',
@@ -71,7 +71,7 @@ def create_word_groups():
     print("Generating German word groups...")
     for level in range(1, 6):
         print(f"  Processing German level {level}")
-        groups = get_word_groups_exact("German", level, 15, 5)
+        groups = get_word_groups_exact("German", level, 15, 8)
         for group_num, group in enumerate(groups, 1):
             group_data = {
                 'language': 'German',
@@ -88,11 +88,14 @@ def save_groups_to_csv(groups, filename):
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = [
             'group_id', 'language', 'level', 'group_number',
-            'word1', 'definition1',
-            'word2', 'definition2', 
-            'word3', 'definition3',
-            'word4', 'definition4',
-            'word5', 'definition5',
+            'word1', 'definition1', 'type1',
+            'word2', 'definition2', 'type2',
+            'word3', 'definition3', 'type3',
+            'word4', 'definition4', 'type4',
+            'word5', 'definition5', 'type5',
+            'word6', 'definition6', 'type6',
+            'word7', 'definition7', 'type7',
+            'word8', 'definition8', 'type8',
             'scene', 'image'
         ]
         
@@ -107,15 +110,18 @@ def save_groups_to_csv(groups, filename):
                 'group_number': group['group_number']
             }
             
-            # Add words and definitions (pad with empty if less than 5 words)
-            for i in range(1, 6):
+            # Add words and definitions (pad with empty if less than 8 words)
+            for i in range(1, 9):
                 if i <= len(group['words']):
                     word, definition = group['words'][i-1]
                     row[f'word{i}'] = word
                     row[f'definition{i}'] = definition
+                    # Words 1-4 are "Good", words 5-8 are "Bad"
+                    row[f'type{i}'] = "Good" if i <= 4 else "Bad"
                 else:
                     row[f'word{i}'] = ''
                     row[f'definition{i}'] = ''
+                    row[f'type{i}'] = ''
             
             # Add new columns as null/empty for now
             row['scene'] = ''

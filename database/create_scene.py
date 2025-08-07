@@ -39,16 +39,19 @@ def create_scene_with_words(group_id, csv_file_path="word_groups.csv"):
         # Get the first matching row
         row = group_row.iloc[0]
         
-        # Extract words and definitions
+        # Extract words and definitions - only "Good" words (words 1-4)
         word_pairs = []
-        for i in range(1, 6):
+        for i in range(1, 9):
             word_col = f'word{i}'
             def_col = f'definition{i}'
-            if pd.notna(row[word_col]) and row[word_col].strip():
+            type_col = f'type{i}'
+            
+            if (pd.notna(row[word_col]) and row[word_col].strip() and 
+                pd.notna(row[type_col]) and row[type_col] == "Good"):
                 word_pairs.append((row[word_col], row[def_col]))
         
         if not word_pairs:
-            return {"error": f"No words found for group {group_id}"}
+            return {"error": f"No 'Good' words found for group {group_id}"}
         
         # Prepare translations for AI prompt
         translations = [pair[1] for pair in word_pairs]
@@ -121,12 +124,12 @@ Instructions:
 
 if __name__ == "__main__":
     # Process the first 15 groups
-    print("Processing first 15 groups for scene generation...")
+    print("Processing first 10 groups for scene generation...")
     
     successful_groups = []
     failed_groups = []
     
-    for group_id in range(1, 16):
+    for group_id in range(1, 11):
         print(f"\nProcessing Group {group_id}...")
         result = create_scene_with_words(group_id)
         
