@@ -14,7 +14,6 @@ def create_database():
     
     # Drop table if exists to recreate with fresh data
     cursor.execute('DROP TABLE IF EXISTS word')
-    cursor.execute('DROP TABLE IF EXISTS levels')
     
     # Create word table without category
     cursor.execute('''
@@ -25,19 +24,6 @@ def create_database():
             definition TEXT NOT NULL,
             definition_language TEXT NOT NULL,
             level INTEGER NOT NULL
-        )
-    ''')
-    
-    # Create levels table
-    cursor.execute('''
-        CREATE TABLE levels (
-            level_id TEXT PRIMARY KEY,
-            language TEXT NOT NULL,
-            level_number INTEGER NOT NULL,
-            sentence_prompt TEXT,
-            word_ids TEXT,
-            image_path TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     

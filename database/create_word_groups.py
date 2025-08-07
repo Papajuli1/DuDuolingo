@@ -44,7 +44,7 @@ def get_word_groups_exact(language, level, groups_count, words_per_group=5):
     
     return groups
 
-def create_all_word_groups():
+def create_word_groups():
     """
     Create all word groups as specified:
     - Spanish: 13 groups from each level 1-15 (195 groups)
@@ -93,7 +93,7 @@ def save_groups_to_csv(groups, filename):
             'word3', 'definition3',
             'word4', 'definition4',
             'word5', 'definition5',
-            'sentence', 'prompt', 'image'
+            'scene', 'image'
         ]
         
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -118,8 +118,7 @@ def save_groups_to_csv(groups, filename):
                     row[f'definition{i}'] = ''
             
             # Add new columns as null/empty for now
-            row['sentence'] = ''
-            row['prompt'] = ''
+            row['scene'] = ''
             row['image'] = ''
             
             writer.writerow(row)
@@ -129,13 +128,12 @@ if __name__ == "__main__":
     print("Spanish: 13 groups per level for levels 1-15 (195 groups)")
     print("German: 13 groups per level for levels 1-5 (65 groups)")
     print("Expected total: 260 groups")
-    
-    groups = create_all_word_groups()
-    
+
+    groups = create_word_groups()
     print(f"\nGenerated {len(groups)} word groups")
     
     # Save to CSV
-    output_file = "word_groups_all.csv"
+    output_file = "word_groups.csv"
     save_groups_to_csv(groups, output_file)
     
     print(f"Word groups saved to {output_file}")
