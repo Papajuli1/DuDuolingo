@@ -28,11 +28,11 @@ def create_database():
     ''')
     
     # Load Spanish-English vocabulary
-    load_csv_data(cursor, 'vocab-ES-EN.csv', 'Spanish', 'English')
+    load_csv_data(cursor, 'vocab-ES-EN-Vol1.csv', 'Spanish', 'English')
     
     # Load German-English vocabulary
-    load_csv_data(cursor, 'vocab-DE-EN.csv', 'German', 'English')
-    
+    load_csv_data(cursor, 'vocab-DE-EN-Vol1.csv', 'German', 'English')
+
     # Commit changes and close connection
     conn.commit()
     conn.close()
