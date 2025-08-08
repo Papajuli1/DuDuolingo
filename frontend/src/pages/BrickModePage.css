@@ -1,0 +1,86 @@
+.brickmode-container {
+  padding: 40px 20px;
+}
+
+.brickmode-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brickmode-back-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #58cc02;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+.brickmode-home-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #ccc;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.brickmode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.brickmode-card {
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.brickmode-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.brickmode-card-title {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.brickmode-card-level {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.brickmode-card-def {
+  margin: 0;
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.brickmode-loading,
+.brickmode-error,
+.brickmode-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.brickmode-individual {
+  padding: 40px 20px;
+}
+
+.brickmode-individual-header {
+  margin-bottom: 20px;
+}

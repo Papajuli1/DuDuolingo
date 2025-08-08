@@ -85,3 +85,96 @@ def get_word_by_id(word_id):
     conn.close()
     return word
 
+def get_all_bricks():
+    """Get all bricks from the database"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    # First get table info to see column names
+    cursor.execute('PRAGMA table_info(Brick)')
+    columns = cursor.fetchall()
+    print(f"Brick table columns: {columns}")
+    
+    # Simple SELECT without ORDER BY to avoid column name issues
+    cursor.execute('SELECT * FROM Brick')
+    bricks = cursor.fetchall()
+    conn.close()
+    return bricks
+
+def get_brick_by_id(brick_id):
+    """Get a specific brick by ID"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Brick WHERE id = ?', (brick_id,))
+    brick = cursor.fetchone()
+    conn.close()
+    return brick
+
+def get_bricks_by_level(level_start, level_end):
+    """Get bricks within a level range"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT * FROM Brick 
+        WHERE level BETWEEN ? AND ?
+        ORDER BY level
+    ''', (level_start, level_end))
+    bricks = cursor.fetchall()
+    conn.close()
+    return bricks
+
+def get_bricks_by_language(brick_language):
+    """Get bricks by language"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Brick WHERE brick_language = ?', (brick_language,))
+    bricks = cursor.fetchall()
+    conn.close()
+    return bricks
+
+def get_random_bricks(language, limit=10):
+    """Get random bricks for practice"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT * FROM Brick 
+        WHERE brick_language = ? 
+        ORDER BY RANDOM() 
+        LIMIT ?
+    ''', (language, limit))
+    bricks = cursor.fetchall()
+    conn.close()
+    return bricks
+
+def search_bricks(search_term):
+    """Search bricks by term"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT * FROM Brick 
+        WHERE brick LIKE ? OR definition LIKE ?
+        ORDER BY brick
+    ''', (f'%{search_term}%', f'%{search_term}%'))
+    bricks = cursor.fetchall()
+    conn.close()
+    return bricks
+
+def get_brick_count():
+    """Get total brick count"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Brick')
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
+
+def add_brick(brick, brick_language, definition, definition_language, level):
+    """Add a new brick to the database"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO Brick (brick, brick_language, definition, definition_language, level)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (brick, brick_language, definition, definition_language, level))
+    conn.commit()
+    conn.close()
+
