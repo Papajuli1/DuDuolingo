@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './Brick.css';
 
-const Brick = ({ brickData, onWordClick, onContinue }) => {
+const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   const [randomizedWords, setRandomizedWords] = useState([]);
   const [clickedIndices, setClickedIndices] = useState([]);
   const [selectedWordIdx, setSelectedWordIdx] = useState(null);
+  const [hasCompleted, setHasCompleted] = useState(false);
 
   useEffect(() => {
     if (brickData && Array.isArray(brickData.words)) {
@@ -14,7 +15,7 @@ const Brick = ({ brickData, onWordClick, onContinue }) => {
       setClickedIndices([]);
       setSelectedWordIdx(null);
     }
-  }, [brickData]);
+  }, [brickData.group_id]); // Only reset when the brick changes
 
   // Check if all "Good" words have been clicked
   const goodIndices = randomizedWords
@@ -23,15 +24,30 @@ const Brick = ({ brickData, onWordClick, onContinue }) => {
   const allGoodClicked = goodIndices.every(idx => clickedIndices.includes(idx)) && goodIndices.length > 0;
 
   useEffect(() => {
+    // Reset local completion state when brick changes
+    setHasCompleted(false);
+  }, [brickData.group_id]);
+
+  useEffect(() => {
     // Mark brick as completed in backend when all good words are clicked
-    if (allGoodClicked && brickData && !brickData.completed) {
+    if (
+      allGoodClicked &&
+      brickData &&
+      !brickData.completed &&
+      !hasCompleted
+    ) {
+      setHasCompleted(true);
       fetch('http://localhost:5000/api/brick/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ brick_id: brickData.group_id || brickData.id })
       });
+      // Notify parent to update completed status
+      if (onBrickCompleted) {
+        onBrickCompleted(brickData.group_id || brickData.id);
+      }
     }
-  }, [allGoodClicked, brickData]);
+  }, [allGoodClicked, brickData, onBrickCompleted, hasCompleted]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -60,7 +76,9 @@ const Brick = ({ brickData, onWordClick, onContinue }) => {
     <div className="brick-container">
       <div className="brick-header">
         <h3 className="brick-title">{brickData.brick}</h3>
-        <span className={`brick-level${brickData.completed ? ' brick-level-completed' : ''}`}>Level {brickData.level}</span>
+        <span className={`brick-level${brickData.completed ? ' brick-level-completed' : ''}`}>
+          Level {brickData.level ? brickData.level : 1}
+        </span>
       </div>
       
       {brickData.image_url && (

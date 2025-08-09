@@ -81,18 +81,23 @@ const BrickModePage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ brick_id: brickIdentifier })
       });
-      // Refresh bricks to get updated completion status
-      const response = await fetch('http://localhost:5000/api/bricks');
-      const updatedBricks = await response.json();
-      setBricks(updatedBricks);
+
+      // Update only the completed status of the selected brick in local state
+      setBricks(prevBricks =>
+        prevBricks.map(brick =>
+          brick.group_id === brickIdentifier
+            ? { ...brick, completed: 1 }
+            : brick
+        )
+      );
 
       // Find the next uncompleted brick after the current one using group_id
-      let nextIdx = updatedBricks.findIndex(b => b.group_id === brickIdentifier) + 1;
-      while (nextIdx < updatedBricks.length && updatedBricks[nextIdx].completed) {
+      let nextIdx = bricks.findIndex(b => b.group_id === brickIdentifier) + 1;
+      while (nextIdx < bricks.length && bricks[nextIdx].completed) {
         nextIdx++;
       }
-      if (nextIdx < updatedBricks.length) {
-        setSelectedBrick(updatedBricks[nextIdx]);
+      if (nextIdx < bricks.length) {
+        setSelectedBrick(bricks[nextIdx]);
       } else {
         setSelectedBrick(null);
       }
@@ -117,6 +122,23 @@ const BrickModePage = () => {
       );
       setError(null);
     });
+  };
+
+  // Callback for Brick to mark as completed
+  const handleBrickCompleted = (groupId) => {
+    setBricks(prevBricks =>
+      prevBricks.map(brick =>
+        brick.group_id === groupId
+          ? { ...brick, completed: 1 }
+          : brick
+      )
+    );
+    // Also update selectedBrick so UI reflects completed status
+    setSelectedBrick(prev =>
+      prev && prev.group_id === groupId
+        ? { ...prev, completed: 1 }
+        : prev
+    );
   };
 
   if (loading) {
@@ -163,7 +185,12 @@ const BrickModePage = () => {
             Home
           </button>
         </div>
-        <Brick brickData={selectedBrick} onWordClick={handleWordClick} onContinue={handleContinue} />
+        <Brick
+          brickData={selectedBrick}
+          onWordClick={handleWordClick}
+          onContinue={handleContinue}
+          onBrickCompleted={handleBrickCompleted}
+        />
       </div>
     );
   }

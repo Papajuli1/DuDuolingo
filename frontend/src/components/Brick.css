@@ -29,8 +29,10 @@
 }
 
 .brick-level-completed {
-  color: #58cc02;
+  background-color: #58cc02;
+  color: #fff;
   font-weight: bold;
+  border: 2px solid #58cc02;
 }
 
 .brick-image-container {
