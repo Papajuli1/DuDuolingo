@@ -28,6 +28,11 @@
   font-size: 0.8rem;
 }
 
+.brick-level-completed {
+  color: #58cc02;
+  font-weight: bold;
+}
+
 .brick-image-container {
   text-align: center;
   margin-bottom: 20px;
@@ -63,6 +68,18 @@
   border-color: #58cc02;
 }
 
+.word-button.word-good {
+  background-color: #d4f7d4;
+  border-color: #58cc02;
+  color: #2e7d32;
+}
+
+.word-button.word-bad {
+  background-color: #ffd6d6;
+  border-color: #ff3b3b;
+  color: #b71c1c;
+}
+
 .brick-definition {
   background-color: #f8f9fa;
   padding: 15px;
@@ -74,4 +91,41 @@
   margin: 0;
   color: #666;
   font-size: 0.9rem;
+}
+
+.word-definition {
+  margin: 15px 0;
+  padding: 12px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  border-left: 4px solid #58cc02;
+  color: #333;
+}
+
+.brick-success {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.brick-success-message {
+  color: #58cc02;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.brick-success-btn {
+  padding: 10px 24px;
+  background: #58cc02;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.brick-success-btn:hover {
+  background: #4cae00;
 }

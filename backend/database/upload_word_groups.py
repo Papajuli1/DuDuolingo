@@ -47,7 +47,8 @@ def create_brick_table():
             definition8 TEXT,
             type8 TEXT,
             scene TEXT,
-            image TEXT
+            image TEXT,
+            completed INTEGER DEFAULT 0
         )
     ''')
     
@@ -114,7 +115,8 @@ def upload_word_groups():
                     'definition8': row.get('definition8', '').strip().strip('"'),
                     'type8': row.get('type8', '').strip(),
                     'scene': row.get('scene', '').strip().strip('"'),
-                    'image': row.get('image', '').strip()
+                    'image': row.get('image', '').strip(),
+                    'completed': 0  # Always set to 0 on upload
                 }
                 
                 # Skip rows with missing essential data
@@ -133,7 +135,7 @@ def upload_word_groups():
                         word6, definition6, type6,
                         word7, definition7, type7,
                         word8, definition8, type8,
-                        scene, image
+                        scene, image, completed
                     ) VALUES (
                         ?, ?, ?, ?,
                         ?, ?, ?,
@@ -143,8 +145,7 @@ def upload_word_groups():
                         ?, ?, ?,
                         ?, ?, ?,
                         ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?
+                        ?, ?, ?
                     )
                 ''', (
                     data['group_id'], data['language'], data['level'], data['group_number'],
@@ -156,7 +157,7 @@ def upload_word_groups():
                     data['word6'], data['definition6'], data['type6'],
                     data['word7'], data['definition7'], data['type7'],
                     data['word8'], data['definition8'], data['type8'],
-                    data['scene'], data['image']
+                    data['scene'], data['image'], data['completed']
                 ))
                 
                 rows_uploaded += 1

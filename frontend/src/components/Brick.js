@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import './Brick.css';
 
-const Brick = ({ brickData, onWordClick }) => {
+const Brick = ({ brickData, onWordClick, onContinue }) => {
   const [randomizedWords, setRandomizedWords] = useState([]);
+  const [clickedIndices, setClickedIndices] = useState([]);
+  const [selectedWordIdx, setSelectedWordIdx] = useState(null);
 
   useEffect(() => {
     if (brickData && Array.isArray(brickData.words)) {
-      // Filter out empty/null words and randomize
-      const validWords = brickData.words.filter(word => word && word.trim() !== '');
+      // If words are objects, shuffle them
+      const validWords = brickData.words.filter(word => word && word.text && word.text.trim() !== '');
       setRandomizedWords(shuffleArray(validWords));
+      setClickedIndices([]);
+      setSelectedWordIdx(null);
     }
   }, [brickData]);
+
+  // Check if all "Good" words have been clicked
+  const goodIndices = randomizedWords
+    .map((word, idx) => word.type === "Good" ? idx : null)
+    .filter(idx => idx !== null);
+  const allGoodClicked = goodIndices.every(idx => clickedIndices.includes(idx)) && goodIndices.length > 0;
+
+  useEffect(() => {
+    // Mark brick as completed in backend when all good words are clicked
+    if (allGoodClicked && brickData && !brickData.completed) {
+      fetch('http://localhost:5000/api/brick/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brick_id: brickData.group_id || brickData.id })
+      });
+    }
+  }, [allGoodClicked, brickData]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -26,8 +47,12 @@ const Brick = ({ brickData, onWordClick }) => {
   }
 
   const handleWordClick = (word, index) => {
-    if (onWordClick) {
-      onWordClick(word, index);
+    if (!clickedIndices.includes(index)) {
+      setClickedIndices([...clickedIndices, index]);
+      setSelectedWordIdx(index);
+      if (onWordClick) {
+        onWordClick(word, index);
+      }
     }
   };
 
@@ -35,7 +60,7 @@ const Brick = ({ brickData, onWordClick }) => {
     <div className="brick-container">
       <div className="brick-header">
         <h3 className="brick-title">{brickData.brick}</h3>
-        <span className="brick-level">Level {brickData.level}</span>
+        <span className={`brick-level${brickData.completed ? ' brick-level-completed' : ''}`}>Level {brickData.level}</span>
       </div>
       
       {brickData.image_url && (
@@ -52,16 +77,46 @@ const Brick = ({ brickData, onWordClick }) => {
       )}
 
       <div className="brick-words-grid">
-        {randomizedWords.map((word, index) => (
-          <button
-            key={`${word}-${index}`}
-            className="word-button"
-            onClick={() => handleWordClick(word, index)}
-          >
-            {word}
-          </button>
-        ))}
+        {randomizedWords.map((word, index) => {
+          let buttonClass = "word-button";
+          if (clickedIndices.includes(index)) {
+            if (word.type === "Good") buttonClass += " word-good";
+            else if (word.type === "Bad") buttonClass += " word-bad";
+          }
+          return (
+            <button
+              key={`${word.text}-${index}`}
+              className={buttonClass}
+              onClick={() => handleWordClick(word, index)}
+              type="button"
+              disabled={clickedIndices.includes(index)}
+            >
+              {word.text}
+            </button>
+          );
+        })}
       </div>
+
+      {selectedWordIdx !== null && randomizedWords[selectedWordIdx] && (
+        <div className="word-definition">
+          <p>
+            <strong>{randomizedWords[selectedWordIdx].text}:</strong>
+            {" "}
+            {randomizedWords[selectedWordIdx].definition
+              ? randomizedWords[selectedWordIdx].definition
+              : "No definition available."}
+          </p>
+        </div>
+      )}
+
+      {allGoodClicked && (
+        <div className="brick-success">
+          <p className="brick-success-message">Good Job</p>
+          <button className="brick-success-btn" onClick={onContinue}>
+            Continue to the next Brick
+          </button>
+        </div>
+      )}
 
       {brickData.definition && (
         <div className="brick-definition">
@@ -73,3 +128,4 @@ const Brick = ({ brickData, onWordClick }) => {
 };
 
 export default Brick;
+

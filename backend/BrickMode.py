@@ -1,5 +1,6 @@
-from flask import jsonify, send_from_directory
+from flask import jsonify, send_from_directory, request
 import os
+from database.db_helper import get_connection, set_brick_completed, get_completed_bricks
 
 def register_brick_routes(app):
     @app.route('/api/test', methods=['GET'])
@@ -29,7 +30,6 @@ def register_brick_routes(app):
     def get_bricks():
         try:
             print("=== Starting get_bricks function ===")
-            from database.db_helper import get_connection
             conn = get_connection()
             cursor = conn.cursor()
             cursor.execute('PRAGMA table_info(Brick)')
@@ -37,36 +37,61 @@ def register_brick_routes(app):
             column_names = [col[1] for col in columns_info]
             print(f"Brick table columns: {column_names}")
 
-            cursor.execute('SELECT * FROM Brick')
-            bricks = cursor.fetchall()
+            if 'completed' not in column_names:
+                print("ERROR: 'completed' column missing from Brick table. Please run:")
+                print("ALTER TABLE Brick ADD COLUMN completed INTEGER DEFAULT 0;")
+                return jsonify({'error': "'completed' column missing from Brick table"}), 500
+
+            try:
+                cursor.execute('SELECT * FROM Brick')
+                bricks = cursor.fetchall()
+            except Exception as sql_err:
+                print(f"SQL Error: {sql_err}")
+                import traceback
+                traceback.print_exc()
+                conn.close()
+                return jsonify({'error': f'SQL Error: {sql_err}'}), 500
+
             conn.close()
             print(f"Found {len(bricks)} bricks")
 
             brick_list = []
             for brick in bricks:
-                brick_dict = dict(zip(column_names, brick))
-                # Ensure 'words' is a list of the word columns (adjust names if needed)
-                word_keys = [key for key in column_names if key.lower().startswith('word')]
-                brick_dict['words'] = [brick_dict[key] for key in word_keys if brick_dict.get(key)]
-                # Build image URL from the path stored in the db
-                image_path = brick_dict.get('image')
-                image_url = None
-                if image_path:
-                    # Always use the filename, regardless of how it's stored
-                    image_filename = os.path.basename(image_path)
-                    image_url = f'/data/images/{image_filename}'
-                # Optionally, keep only relevant keys for frontend
-                filtered_dict = {
-                    'id': brick_dict.get('id'),
-                    'brick': brick_dict.get('brick'),
-                    'brick_language': brick_dict.get('brick_language', ''),
-                    'definition': brick_dict.get('definition', ''),
-                    'definition_language': brick_dict.get('definition_language', ''),
-                    'level': brick_dict.get('level', 1),
-                    'image_url': image_url,
-                    'words': brick_dict['words']
-                }
-                brick_list.append(filtered_dict)
+                try:
+                    brick_dict = dict(zip(column_names, brick))
+                    words = []
+                    for i in range(1, 9):  # word1 to word8
+                        word_text = brick_dict.get(f'word{i}')
+                        word_def = brick_dict.get(f'definition{i}')
+                        word_type = brick_dict.get(f'type{i}')
+                        if word_text and word_text.strip():
+                            words.append({
+                                'text': word_text,
+                                'definition': word_def if word_def else '',
+                                'type': word_type if word_type else ''
+                            })
+                    image_path = brick_dict.get('image')
+                    image_url = None
+                    if image_path:
+                        image_filename = os.path.basename(image_path)
+                        image_url = f'/data/images/{image_filename}'
+                    filtered_dict = {
+                        'group_id': brick_dict.get('group_id'),
+                        'brick': brick_dict.get('brick'),
+                        'brick_language': brick_dict.get('language', ''),
+                        'definition': brick_dict.get('definition', ''),
+                        'definition_language': brick_dict.get('definition_language', ''),
+                        'level': brick_dict.get('level', 1),
+                        'image_url': image_url,
+                        'words': words,
+                        'completed': brick_dict.get('completed', 0) == 1
+                    }
+                    brick_list.append(filtered_dict)
+                except Exception as row_err:
+                    print(f"Error processing brick row: {row_err}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
 
             print(f"=== Returning {len(brick_list)} processed bricks ===")
             return jsonify(brick_list)
@@ -76,6 +101,37 @@ def register_brick_routes(app):
             traceback.print_exc()
             return jsonify({'error': str(e), 'type': str(type(e).__name__)}), 500
 
+    @app.route('/api/brick/complete', methods=['POST'])
+    def complete_brick():
+        data = request.get_json()
+        group_id = data.get('brick_id') or data.get('group_id')
+        if group_id is not None:
+            set_brick_completed(group_id, True)
+            return jsonify({'success': True})
+        return jsonify({'success': False, 'error': 'No group_id provided'}), 400
+
+    @app.route('/api/bricks/reset', methods=['POST'])
+    def reset_bricks_endpoint():
+        data = request.get_json()
+        language = data.get('language')
+        try:
+            reset_bricks(language)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+def reset_bricks(language=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if language:
+        cursor.execute("UPDATE Brick SET completed = 0 WHERE language = ?", (language,))
+    else:
+        cursor.execute("UPDATE Brick SET completed = 0")
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
+
 

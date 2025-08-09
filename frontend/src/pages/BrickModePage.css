@@ -84,3 +84,13 @@
 .brickmode-individual-header {
   margin-bottom: 20px;
 }
+
+.brickmode-card-completed {
+  border-color: #58cc02;
+  box-shadow: 0 0 8px #58cc02;
+}
+
+.brickmode-card-level-completed {
+  color: #58cc02;
+  font-weight: bold;
+}

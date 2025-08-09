@@ -172,9 +172,26 @@ def add_brick(brick, brick_language, definition, definition_language, level):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO Brick (brick, brick_language, definition, definition_language, level)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO Brick (brick, brick_language, definition, definition_language, level, completed)
+        VALUES (?, ?, ?, ?, ?, 0)
     ''', (brick, brick_language, definition, definition_language, level))
     conn.commit()
     conn.close()
+
+def set_brick_completed(group_id, completed=True):
+    """Mark a brick as completed (requires 'completed' column in Brick table)"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE Brick SET completed = ? WHERE group_id = ?', (int(completed), group_id))
+    conn.commit()
+    conn.close()
+
+def get_completed_bricks():
+    """Get IDs of completed bricks"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM Brick WHERE completed = 1')
+    ids = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return ids
 

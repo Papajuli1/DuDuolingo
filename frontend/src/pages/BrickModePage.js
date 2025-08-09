@@ -9,10 +9,27 @@ const BrickModePage = () => {
   const [selectedBrick, setSelectedBrick] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [language, setLanguage] = useState('Spanish');
 
   useEffect(() => {
     fetchBricks();
   }, []);
+
+  // Debug: log bricks and their brick_language property
+  useEffect(() => {
+    if (bricks.length > 0) {
+      console.log('Selected language:', language);
+      console.log('First brick keys:', Object.keys(bricks[0]));
+      console.log('First 5 brick_language values:', bricks.slice(0, 5).map(b => b.brick_language));
+      console.log('Bricks:', bricks.map(b => ({
+        group_id: b.group_id,
+        brick_language: b.brick_language,
+        language: b.language,
+        matches_brick_language: b.brick_language === language,
+        matches_language: b.language === language
+      })));
+    }
+  }, [bricks, language]);
 
   const fetchBricks = async () => {
     try {
@@ -56,6 +73,52 @@ const BrickModePage = () => {
     // Add word click logic here
   };
 
+  const handleContinue = async () => {
+    if (selectedBrick) {
+      const brickIdentifier = selectedBrick.group_id;
+      await fetch('http://localhost:5000/api/brick/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brick_id: brickIdentifier })
+      });
+      // Refresh bricks to get updated completion status
+      const response = await fetch('http://localhost:5000/api/bricks');
+      const updatedBricks = await response.json();
+      setBricks(updatedBricks);
+
+      // Find the next uncompleted brick after the current one using group_id
+      let nextIdx = updatedBricks.findIndex(b => b.group_id === brickIdentifier) + 1;
+      while (nextIdx < updatedBricks.length && updatedBricks[nextIdx].completed) {
+        nextIdx++;
+      }
+      if (nextIdx < updatedBricks.length) {
+        setSelectedBrick(updatedBricks[nextIdx]);
+      } else {
+        setSelectedBrick(null);
+      }
+    }
+  };
+
+  const handleResetProgress = async () => {
+    // Try to reset on backend, but always update UI
+    fetch('http://localhost:5000/api/bricks/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ language })
+    }).finally(() => {
+      setSelectedBrick(null);
+      setBricks(prevBricks =>
+        prevBricks.map(brick =>
+          ((brick.brick_language && brick.brick_language === language) ||
+            (!brick.brick_language && brick.language === language))
+            ? { ...brick, completed: 0 }
+            : brick
+        )
+      );
+      setError(null);
+    });
+  };
+
   if (loading) {
     return (
       <div className="brickmode-loading">
@@ -76,6 +139,12 @@ const BrickModePage = () => {
     );
   }
 
+  // Filter bricks by selected language, fallback to 'language' if 'brick_language' is empty
+  const filteredBricks = bricks.filter(brick =>
+    (brick.brick_language && brick.brick_language === language) ||
+    (!brick.brick_language && brick.language === language)
+  );
+
   // Show individual brick view
   if (selectedBrick) {
     return (
@@ -94,7 +163,7 @@ const BrickModePage = () => {
             Home
           </button>
         </div>
-        <Brick brickData={selectedBrick} onWordClick={handleWordClick} />
+        <Brick brickData={selectedBrick} onWordClick={handleWordClick} onContinue={handleContinue} />
       </div>
     );
   }
@@ -111,35 +180,55 @@ const BrickModePage = () => {
         >
           Back to Home
         </button>
+        <button
+          className="brickmode-back-btn"
+          onClick={() => setLanguage(language === 'Spanish' ? 'German' : 'Spanish')}
+        >
+          Switch to {language === 'Spanish' ? 'German' : 'Spanish'}
+        </button>
+        <button
+          className="brickmode-back-btn"
+          onClick={handleResetProgress}
+        >
+          Reset Progress
+        </button>
       </div>
 
       <div className="brickmode-grid">
-        {bricks.map((brick) => (
-          <div
-            key={brick.id}
-            className="brickmode-card"
-            onClick={() => handleBrickClick(brick)}
-          >
-            <h3 className="brickmode-card-title">{brick.brick}</h3>
-            <p className="brickmode-card-level">
-              Level {brick.level}
-            </p>
-            {brick.definition && (
-              <p className="brickmode-card-def">
-                {brick.definition.substring(0, 100)}...
-              </p>
-            )}
+        {filteredBricks.length === 0 ? (
+          <div className="brickmode-empty">
+            <p>No bricks available for "{language}".</p>
+            <p>Available brick_language values:</p>
+            <ul>
+              {Array.from(new Set(bricks.map(b => String(b.brick_language)))).map((val, idx) => (
+                <li key={idx}>{JSON.stringify(val)}</li>
+              ))}
+            </ul>
           </div>
-        ))}
+        ) : (
+          filteredBricks.map((brick) => (
+            <div
+              key={brick.group_id}
+              className={`brickmode-card${brick.completed ? ' brickmode-card-completed' : ''}`}
+              onClick={() => handleBrickClick(brick)}
+            >
+              <h3 className="brickmode-card-title">{brick.brick}</h3>
+              <p className={`brickmode-card-level${brick.completed ? ' brickmode-card-level-completed' : ''}`}>
+                Level {brick.level}
+              </p>
+              {brick.definition && (
+                <p className="brickmode-card-def">
+                  {brick.definition.substring(0, 100)}...
+                </p>
+              )}
+            </div>
+          ))
+        )}
       </div>
-
-      {bricks.length === 0 && (
-        <div className="brickmode-empty">
-          <p>No bricks available yet.</p>
-        </div>
-      )}
     </div>
   );
 };
 
 export default BrickModePage;
+
+
