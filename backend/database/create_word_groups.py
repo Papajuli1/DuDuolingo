@@ -52,15 +52,15 @@ def get_word_groups_exact(language, level, groups_count, words_per_group=8):
 def create_word_groups():
     """
     Create all word groups as specified:
-    - Spanish: 10 groups from each level 1-6 (60 groups)
+    - Spanish: 10 groups from each level 1-5 (50 groups)
     - German: 10 groups from each level 1-3 (30 groups)
-    Total: 90 groups
+    Total: 80 groups
     """
     all_groups = []
 
-    # Spanish levels 1-6 (10 groups each)
+    # Spanish levels 1-5 (10 groups each)
     print("Generating Spanish word groups...")
-    for level in range(1, 7):
+    for level in range(1, 6):
         print(f"  Processing Spanish level {level}")
         groups = get_word_groups_exact("Spanish", level, 10, 8)
         for group_num, group in enumerate(groups, 1):
@@ -136,9 +136,9 @@ def save_groups_to_csv(groups, filename):
 
 if __name__ == "__main__":
     print("Creating all word groups...")
-    print("Spanish: 10 groups per level for levels 1-6 (60 groups)")
+    print("Spanish: 10 groups per level for levels 1-5 (50 groups)")
     print("German: 10 groups per level for levels 1-3 (30 groups)")
-    print("Expected total: 90 groups")
+    print("Expected total: 80 groups")
 
     groups = create_word_groups()
     print(f"\nGenerated {len(groups)} word groups")
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     if spanish_groups:
         spanish_levels = set(g['level'] for g in spanish_groups)
         print(f"  Levels: {sorted(spanish_levels)}")
-        print(f"  Expected: 60 groups (10 × 6 levels)")
+        print(f"  Expected: 50 groups (10 × 5 levels)")
 
     print(f"German groups: {len(german_groups)}")
     if german_groups:
