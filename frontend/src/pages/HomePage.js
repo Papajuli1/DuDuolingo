@@ -20,7 +20,11 @@ const HomePage = () => {
 
   const handleBrickModeClick = () => {
     navigate('/brick-mode');
-  };
+  } 
+
+  const handleLeaderboardClick = () => {
+    navigate('/leaderboard');
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('username');
@@ -43,6 +47,12 @@ const HomePage = () => {
           onClick={handleBrickModeClick}
         >
           Start Brick Mode
+        </button>
+        <button
+          className="leaderboard-button"
+          onClick={handleLeaderboardClick}
+        >
+          Leaderboard
         </button>
       </div>
       <div className="bottom-sections">

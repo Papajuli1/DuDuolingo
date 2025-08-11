@@ -1,0 +1,93 @@
+.current-user-row {
+  background: linear-gradient(90deg, #a5d6a7 0%, #c8e6c9 100%) !important;
+  font-weight: bold;
+  color: #1b5e20;
+  border: 2px solid #388e3c;
+}
+
+.leaderboard-container {
+  max-width: 600px;
+  margin: 48px auto;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.12);
+  text-align: center;
+}
+.leaderboard-container h2 {
+  font-size: 2.2rem;
+  margin-bottom: 24px;
+  color: #388e3c;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px #c8e6c9;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  background: #f1f8e9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+}
+
+.leaderboard-table th, .leaderboard-table td {
+  border: none;
+  padding: 14px 10px;
+  font-size: 1.1rem;
+}
+
+.leaderboard-table th {
+  background: #43a047;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+
+.leaderboard-table tr {
+  transition: background 0.2s;
+}
+
+
+.leaderboard-table tr:nth-child(even) {
+  background: #c8e6c9;
+}
+.leaderboard-table tr:nth-child(odd) {
+  background: #e8f5e9;
+}
+
+
+.leaderboard-table tr:hover {
+  background: #a5d6a7;
+}
+
+.leaderboard-table td:first-child {
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.leaderboard-table td:last-child {
+  color: #388e3c;
+  font-weight: 500;
+}
+
+.return-home-btn {
+  margin-top: 32px;
+  padding: 12px 32px;
+  background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  transition: background 0.2s, transform 0.2s;
+}
+.return-home-btn:hover {
+  background: linear-gradient(90deg, #388e3c 0%, #43a047 100%);
+  transform: scale(1.04);
+}
+

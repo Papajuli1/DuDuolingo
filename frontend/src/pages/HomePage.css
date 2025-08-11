@@ -1,3 +1,18 @@
+/* Leaderboard button style */
+.leaderboard-button {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.leaderboard-button:hover {
+  background: #388e3c;
+}
 /* Logout button top right for homepage */
 .homepage-logout-btn {
   position: absolute;
