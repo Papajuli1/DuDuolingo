@@ -1,3 +1,19 @@
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+.logout-button:hover {
+  background-color: #c0392b;
+}
 .home-page {
   text-align: center;
   padding: 40px 20px;

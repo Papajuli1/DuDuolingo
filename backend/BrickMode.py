@@ -101,14 +101,7 @@ def register_brick_routes(app):
             traceback.print_exc()
             return jsonify({'error': str(e), 'type': str(type(e).__name__)}), 500
 
-    @app.route('/api/brick/complete', methods=['POST'])
-    def complete_brick():
-        data = request.get_json()
-        group_id = data.get('brick_id') or data.get('group_id')
-        if group_id is not None:
-            set_brick_completed(group_id, True)
-            return jsonify({'success': True})
-        return jsonify({'success': False, 'error': 'No group_id provided'}), 400
+    # Removed global brick completion logic. Completion is now tracked per user in UserBrick table.
 
     @app.route('/api/bricks/reset', methods=['POST'])
     def reset_bricks_endpoint():

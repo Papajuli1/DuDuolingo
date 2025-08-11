@@ -37,17 +37,24 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       !hasCompleted
     ) {
       setHasCompleted(true);
-      fetch('http://localhost:5000/api/brick/complete', {
+      // Calculate score
+      const goodClicked = randomizedWords.filter((w, idx) => w.type === "Good" && clickedIndices.includes(idx)).length;
+      const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
+      const totalClicked = goodClicked + badClicked;
+      const score = totalClicked > 0 ? (goodClicked / totalClicked) : 0;
+      // Send score to backend
+      const username = localStorage.getItem('username');
+      fetch('http://localhost:5000/user_brick', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brick_id: brickData.group_id || brickData.id })
+        body: JSON.stringify({ username, group_id: brickData.group_id || brickData.id, score })
       });
-      // Notify parent to update completed status
+      // Notify parent to update completed status and score
       if (onBrickCompleted) {
-        onBrickCompleted(brickData.group_id || brickData.id);
+        onBrickCompleted(brickData.group_id || brickData.id, score);
       }
     }
-  }, [allGoodClicked, brickData, onBrickCompleted, hasCompleted]);
+  }, [allGoodClicked, brickData, onBrickCompleted, hasCompleted, randomizedWords, clickedIndices]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -129,7 +136,18 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
 
       {allGoodClicked && (
         <div className="brick-success">
-          <p className="brick-success-message">Good Job</p>
+          <p className="brick-success-message">Good Job!</p>
+          {/* Show score */}
+          <p className="brick-score-message">
+            Score: {
+              (() => {
+                const goodClicked = randomizedWords.filter((w, idx) => w.type === "Good" && clickedIndices.includes(idx)).length;
+                const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
+                const totalClicked = goodClicked + badClicked;
+                return totalClicked > 0 ? (goodClicked / totalClicked).toFixed(2) : '0.00';
+              })()
+            }
+          </p>
           <button className="brick-success-btn" onClick={onContinue}>
             Continue to the next Brick
           </button>

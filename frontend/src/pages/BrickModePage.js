@@ -11,8 +11,15 @@ const BrickModePage = () => {
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState('Spanish');
 
+  const [userBricks, setUserBricks] = useState([]);
   useEffect(() => {
     fetchBricks();
+    const username = localStorage.getItem('username');
+    if (username) {
+      fetch(`http://localhost:5000/user_bricks/${username}`)
+        .then(res => res.json())
+        .then(data => setUserBricks(data.bricks || []));
+    }
   }, []);
 
   // Debug: log bricks and their brick_language property
@@ -70,37 +77,13 @@ const BrickModePage = () => {
 
   const handleWordClick = (word, index) => {
     console.log(`Clicked word: ${word} at index: ${index}`);
-    // Add word click logic here
   };
 
   const handleContinue = async () => {
     if (selectedBrick) {
       const brickIdentifier = selectedBrick.group_id;
-      await fetch('http://localhost:5000/api/brick/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brick_id: brickIdentifier })
-      });
-
-      // Update only the completed status of the selected brick in local state
-      setBricks(prevBricks =>
-        prevBricks.map(brick =>
-          brick.group_id === brickIdentifier
-            ? { ...brick, completed: 1 }
-            : brick
-        )
-      );
-
-      // Find the next uncompleted brick after the current one using group_id
       let nextIdx = bricks.findIndex(b => b.group_id === brickIdentifier) + 1;
-      while (nextIdx < bricks.length && bricks[nextIdx].completed) {
-        nextIdx++;
-      }
-      if (nextIdx < bricks.length) {
-        setSelectedBrick(bricks[nextIdx]);
-      } else {
-        setSelectedBrick(null);
-      }
+      setSelectedBrick(nextIdx < bricks.length ? bricks[nextIdx] : null);
     }
   };
 
@@ -125,20 +108,19 @@ const BrickModePage = () => {
   };
 
   // Callback for Brick to mark as completed
-  const handleBrickCompleted = (groupId) => {
-    setBricks(prevBricks =>
-      prevBricks.map(brick =>
-        brick.group_id === groupId
-          ? { ...brick, completed: 1 }
-          : brick
-      )
-    );
-    // Also update selectedBrick so UI reflects completed status
-    setSelectedBrick(prev =>
-      prev && prev.group_id === groupId
-        ? { ...prev, completed: 1 }
-        : prev
-    );
+  const handleBrickCompleted = (groupId, score = 1) => {
+    setUserBricks(prev => {
+      const idx = prev.findIndex(b => b.group_id === groupId);
+      if (idx !== -1) {
+        // Update score for existing entry
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], score };
+        return updated;
+      } else {
+        // Add new entry
+        return [...prev, { group_id: groupId, score }];
+      }
+    });
   };
 
   if (loading) {
@@ -189,13 +171,31 @@ const BrickModePage = () => {
           brickData={selectedBrick}
           onWordClick={handleWordClick}
           onContinue={handleContinue}
-          onBrickCompleted={handleBrickCompleted}
+          onBrickCompleted={(groupId, score) => handleBrickCompleted(groupId, score)}
         />
       </div>
     );
   }
 
+  // Determine unlocked level
+  const levels = Array.from(new Set(filteredBricks.map(b => b.level))).sort((a, b) => a - b);
+  let unlockedLevel = levels[0];
+  for (let lvl of levels) {
+    const bricksInLevel = filteredBricks.filter(b => b.level === lvl);
+    const allCompleted = bricksInLevel.every(b => {
+      const userBrick = userBricks.find(ub => ub.group_id === b.group_id);
+      return userBrick && userBrick.score && userBrick.score !== 0;
+    });
+    if (allCompleted) {
+      unlockedLevel = lvl + 1;
+    } else {
+      break;
+    }
+  }
+
   // Show bricks list view
+
+
   return (
     <div className="brickmode-container">
       <div className="brickmode-header">
@@ -221,37 +221,72 @@ const BrickModePage = () => {
         </button>
       </div>
 
-      <div className="brickmode-grid">
-        {filteredBricks.length === 0 ? (
-          <div className="brickmode-empty">
-            <p>No bricks available for "{language}".</p>
-            <p>Available brick_language values:</p>
-            <ul>
-              {Array.from(new Set(bricks.map(b => String(b.brick_language)))).map((val, idx) => (
-                <li key={idx}>{JSON.stringify(val)}</li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          filteredBricks.map((brick) => (
-            <div
-              key={brick.group_id}
-              className={`brickmode-card${brick.completed ? ' brickmode-card-completed' : ''}`}
-              onClick={() => handleBrickClick(brick)}
-            >
-              <h3 className="brickmode-card-title">{brick.brick}</h3>
-              <p className={`brickmode-card-level${brick.completed ? ' brickmode-card-level-completed' : ''}`}>
-                Level {brick.level}
-              </p>
-              {brick.definition && (
-                <p className="brickmode-card-def">
-                  {brick.definition.substring(0, 100)}...
-                </p>
+      {/* Group bricks by level and display each level in its own div */}
+      {filteredBricks.length === 0 ? (
+        <div className="brickmode-empty">
+          <p>No bricks available for "{language}".</p>
+          <p>Available brick_language values:</p>
+          <ul>
+            {Array.from(new Set(bricks.map(b => String(b.brick_language)))).map((val, idx) => (
+              <li key={idx}>{JSON.stringify(val)}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        levels.map(level => {
+          const bricksInLevel = filteredBricks.filter(b => b.level === level);
+          const isLevelUnlocked = level <= unlockedLevel;
+          return (
+            <div key={level} className="brickmode-level-section">
+              <h2 className="brickmode-level-title">Level {level}</h2>
+              {!isLevelUnlocked && (
+                <div className="brickmode-locked-message" style={{marginBottom:'10px'}}>Complete all previous bricks to unlock this level</div>
               )}
+              <div className="brickmode-level-grid">
+                {bricksInLevel.map((brick, idx) => {
+                  const userBrick = userBricks.find(ub => ub.group_id === brick.group_id);
+                  const isCompleted = userBrick && userBrick.score && userBrick.score !== 0;
+                  const isUnlocked = brick.level <= unlockedLevel;
+                  return (
+                    <div
+                      key={brick.group_id}
+                      className={`brickmode-card${isCompleted ? ' brickmode-card-completed' : ''}${!isUnlocked ? ' brickmode-card-locked' : ''}`}
+                      onClick={isUnlocked ? () => handleBrickClick(brick) : undefined}
+                      style={{ pointerEvents: isUnlocked ? 'auto' : 'none' }}
+                      title={!isUnlocked ? 'Complete all previous bricks to unlock this level' : ''}
+                    >
+                      <h3 className="brickmode-card-title">
+                        {!isUnlocked && (
+                          <span style={{marginRight: '8px', verticalAlign: 'middle'}}>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="10" cy="10" r="10" fill="#bbb" />
+                              <path d="M6 10V8a4 4 0 1 1 8 0v2" stroke="#666" strokeWidth="1.5" fill="none" />
+                              <rect x="6" y="10" width="8" height="5" rx="1.5" fill="#eee" stroke="#666" strokeWidth="1.5" />
+                              <circle cx="10" cy="12.5" r="1" fill="#666" />
+                            </svg>
+                          </span>
+                        )}
+                        {brick.brick}
+                      </h3>
+                      <p className="brickmode-card-level">
+                        Level {brick.level}
+                      </p>
+                      {!isUnlocked && (
+                        <p className="brickmode-card-locked-text" style={{color:'#888', fontSize:'0.95em', margin:'4px 0'}}>Locked</p>
+                      )}
+                      {brick.definition && (
+                        <p className="brickmode-card-def">
+                          {brick.definition.substring(0, 100)}...
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          ))
-        )}
-      </div>
+          );
+        })
+      )}
     </div>
   );
 };
