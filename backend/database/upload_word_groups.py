@@ -59,119 +59,83 @@ def create_brick_table():
 def upload_word_groups():
     """Upload word_groups.csv data to the Brick table"""
     csv_path = os.path.join(os.path.dirname(__file__), 'word_groups.csv')
-    
+
     if not os.path.exists(csv_path):
         print(f"CSV file not found: {csv_path}")
         return
-    
+
     conn = get_connection()
     cursor = conn.cursor()
-    
-    # Read and upload CSV data
+
+    # Define the expected columns in order
+    columns = [
+        'group_id', 'language', 'level', 'group_number',
+        'word1', 'definition1', 'type1',
+        'word2', 'definition2', 'type2',
+        'word3', 'definition3', 'type3',
+        'word4', 'definition4', 'type4',
+        'word5', 'definition5', 'type5',
+        'word6', 'definition6', 'type6',
+        'word7', 'definition7', 'type7',
+        'word8', 'definition8', 'type8',
+        'scene', 'image'
+    ]
+    # Add completed column
+    columns.append('completed')
+
     rows_uploaded = 0
-    
+
     try:
         with open(csv_path, 'r', encoding='utf-8') as file:
-            # Skip comment line if it exists
             first_line = file.readline().strip()
             if first_line.startswith('//'):
-                # Comment line found, continue reading from next line
                 pass
             else:
-                # No comment line, reset file pointer
                 file.seek(0)
-            
-            csv_reader = csv.DictReader(file)
-            
+
+            csv_reader = csv.reader(file)
+            header = next(csv_reader)
             for row in csv_reader:
-                # Clean and prepare data
-                data = {
-                    'group_id': int(row.get('group_id', 0)) if row.get('group_id', '').isdigit() else None,
-                    'language': row.get('language', '').strip(),
-                    'level': int(row.get('level', 0)) if row.get('level', '').isdigit() else 0,
-                    'group_number': int(row.get('group_number', 0)) if row.get('group_number', '').isdigit() else 0,
-                    'word1': row.get('word1', '').strip(),
-                    'definition1': row.get('definition1', '').strip().strip('"'),
-                    'type1': row.get('type1', '').strip(),
-                    'word2': row.get('word2', '').strip(),
-                    'definition2': row.get('definition2', '').strip().strip('"'),
-                    'type2': row.get('type2', '').strip(),
-                    'word3': row.get('word3', '').strip(),
-                    'definition3': row.get('definition3', '').strip().strip('"'),
-                    'type3': row.get('type3', '').strip(),
-                    'word4': row.get('word4', '').strip(),
-                    'definition4': row.get('definition4', '').strip().strip('"'),
-                    'type4': row.get('type4', '').strip(),
-                    'word5': row.get('word5', '').strip(),
-                    'definition5': row.get('definition5', '').strip().strip('"'),
-                    'type5': row.get('type5', '').strip(),
-                    'word6': row.get('word6', '').strip(),
-                    'definition6': row.get('definition6', '').strip().strip('"'),
-                    'type6': row.get('type6', '').strip(),
-                    'word7': row.get('word7', '').strip(),
-                    'definition7': row.get('definition7', '').strip().strip('"'),
-                    'type7': row.get('type7', '').strip(),
-                    'word8': row.get('word8', '').strip(),
-                    'definition8': row.get('definition8', '').strip().strip('"'),
-                    'type8': row.get('type8', '').strip(),
-                    'scene': row.get('scene', '').strip().strip('"'),
-                    'image': row.get('image', '').strip(),
-                    'completed': 0  # Always set to 0 on upload
-                }
-                
-                # Skip rows with missing essential data
+                # Pad row to expected length (30 columns, completed is added below)
+                if len(row) < len(columns) - 1:
+                    row += [''] * (len(columns) - 1 - len(row))
+                # Prepare data dict
+                data = dict(zip(columns[:-1], row))
+                # Clean and convert types
+                data['group_id'] = int(data.get('group_id', 0)) if data.get('group_id', '').isdigit() else None
+                data['language'] = data.get('language', '').strip()
+                data['level'] = int(data.get('level', 0)) if data.get('level', '').isdigit() else 0
+                data['group_number'] = int(data.get('group_number', 0)) if data.get('group_number', '').isdigit() else 0
+                for i in range(1, 9):
+                    data[f'word{i}'] = data.get(f'word{i}', '').strip()
+                    data[f'definition{i}'] = data.get(f'definition{i}', '').strip().strip('"')
+                    data[f'type{i}'] = data.get(f'type{i}', '').strip()
+                data['scene'] = data.get('scene', '').strip().strip('"')
+                data['image'] = data.get('image', '').strip()
+                data['completed'] = 0
+
                 if not data['language'] or data['level'] == 0:
                     continue
-                
-                # Insert into database
-                cursor.execute('''
+
+                cursor.execute(f'''
                     INSERT INTO Brick (
-                        group_id, language, level, group_number,
-                        word1, definition1, type1,
-                        word2, definition2, type2,
-                        word3, definition3, type3,
-                        word4, definition4, type4,
-                        word5, definition5, type5,
-                        word6, definition6, type6,
-                        word7, definition7, type7,
-                        word8, definition8, type8,
-                        scene, image, completed
+                        {', '.join(columns)}
                     ) VALUES (
-                        ?, ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?,
-                        ?, ?, ?
+                        {', '.join(['?'] * len(columns))}
                     )
-                ''', (
-                    data['group_id'], data['language'], data['level'], data['group_number'],
-                    data['word1'], data['definition1'], data['type1'],
-                    data['word2'], data['definition2'], data['type2'],
-                    data['word3'], data['definition3'], data['type3'],
-                    data['word4'], data['definition4'], data['type4'],
-                    data['word5'], data['definition5'], data['type5'],
-                    data['word6'], data['definition6'], data['type6'],
-                    data['word7'], data['definition7'], data['type7'],
-                    data['word8'], data['definition8'], data['type8'],
-                    data['scene'], data['image'], data['completed']
-                ))
-                
+                ''', tuple(data[col] for col in columns))
+
                 rows_uploaded += 1
-    
+
     except Exception as e:
         print(f"Error uploading data: {e}")
         conn.rollback()
         conn.close()
         return
-    
-    # Commit changes
+
     conn.commit()
     conn.close()
-    
+
     print(f"Successfully uploaded {rows_uploaded} word groups to Brick table!")
 
 def verify_upload():
@@ -217,3 +181,4 @@ if __name__ == "__main__":
     verify_upload()
     
     print("\nUpload completed successfully!")
+   
