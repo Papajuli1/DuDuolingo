@@ -1,3 +1,21 @@
+/* Logout button top right for homepage */
+.homepage-logout-btn {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  background: linear-gradient(90deg, #e74c3c 0%, #1cb0f6 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+.homepage-logout-btn:hover {
+  background: linear-gradient(90deg, #1cb0f6 0%, #e74c3c 100%);
+}
 .logout-button {
   background-color: #e74c3c;
   color: white;

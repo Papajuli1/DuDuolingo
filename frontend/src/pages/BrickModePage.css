@@ -1,3 +1,42 @@
+/* Reset confirmation message */
+.brickmode-reset-msg {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  background: #1cb0f6;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  z-index: 100;
+  animation: fadeInOut 5s linear;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* Logout button top right */
+.brickmode-logout-btn {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  background: linear-gradient(90deg, #58cc02 0%, #1cb0f6 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+.brickmode-logout-btn:hover {
+  background: linear-gradient(90deg, #1cb0f6 0%, #58cc02 100%);
+}
 .brickmode-locked-message {
   background: #fff8e1;
   color: #b8860b;

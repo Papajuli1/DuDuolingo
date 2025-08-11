@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Brick.css';
 
 const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
+  const [lockedScore, setLockedScore] = useState(null);
   const [randomizedWords, setRandomizedWords] = useState([]);
   const [clickedIndices, setClickedIndices] = useState([]);
   const [selectedWordIdx, setSelectedWordIdx] = useState(null);
@@ -15,7 +16,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       setClickedIndices([]);
       setSelectedWordIdx(null);
     }
-  }, [brickData.group_id]); // Only reset when the brick changes
+  }, [brickData, brickData.group_id]); // Only reset when the brick changes
 
   // Check if all "Good" words have been clicked
   const goodIndices = randomizedWords
@@ -26,7 +27,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   useEffect(() => {
     // Reset local completion state when brick changes
     setHasCompleted(false);
-  }, [brickData.group_id]);
+  }, [brickData, brickData.group_id]);
 
   useEffect(() => {
     // Mark brick as completed in backend when all good words are clicked
@@ -41,7 +42,8 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       const goodClicked = randomizedWords.filter((w, idx) => w.type === "Good" && clickedIndices.includes(idx)).length;
       const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
       const totalClicked = goodClicked + badClicked;
-      const score = totalClicked > 0 ? (goodClicked / totalClicked) : 0;
+      const score = totalClicked > 0 ? Math.round((goodClicked / totalClicked) * 100) : 0;
+      setLockedScore(score);
       // Send score to backend
       const username = localStorage.getItem('username');
       fetch('http://localhost:5000/user_brick', {
@@ -70,7 +72,15 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   }
 
   const handleWordClick = (word, index) => {
-    if (!clickedIndices.includes(index)) {
+    // Prevent further clicks from affecting score after completion
+    if (!clickedIndices.includes(index) && !allGoodClicked) {
+      setClickedIndices([...clickedIndices, index]);
+      setSelectedWordIdx(index);
+      if (onWordClick) {
+        onWordClick(word, index);
+      }
+    } else if (!clickedIndices.includes(index)) {
+      // Allow UI feedback for word selection, but don't update score or send to backend
       setClickedIndices([...clickedIndices, index]);
       setSelectedWordIdx(index);
       if (onWordClick) {
@@ -137,16 +147,9 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       {allGoodClicked && (
         <div className="brick-success">
           <p className="brick-success-message">Good Job!</p>
-          {/* Show score */}
+          {/* Show score as integer out of 100, locked after completion */}
           <p className="brick-score-message">
-            Score: {
-              (() => {
-                const goodClicked = randomizedWords.filter((w, idx) => w.type === "Good" && clickedIndices.includes(idx)).length;
-                const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
-                const totalClicked = goodClicked + badClicked;
-                return totalClicked > 0 ? (goodClicked / totalClicked).toFixed(2) : '0.00';
-              })()
-            }
+            Score: {lockedScore !== null ? lockedScore : ''}
           </p>
           <button className="brick-success-btn" onClick={onContinue}>
             Continue to the next Brick

@@ -1,3 +1,33 @@
+@user_bp.route('/user_bricks/reset', methods=['POST'])
+def reset_user_bricks():
+    print(f"[DEBUG] Resetting user bricks for username={username}, language={language}")
+    data = request.get_json()
+    username = data.get('username')
+    language = data.get('language')
+    if not username:
+        return jsonify({'error': 'Missing username'}), 400
+    conn = get_db()
+    cursor = conn.cursor()
+    # Get all group_ids for the selected language
+    if language:
+        cursor.execute('SELECT group_id FROM Brick WHERE language = ? OR brick_language = ?', (language, language))
+    else:
+        cursor.execute('SELECT group_id FROM Brick')
+    group_ids = [row[0] for row in cursor.fetchall()]
+    print(f"[DEBUG] Found group_ids: {group_ids}")
+    # Reset scores for this user and these bricks
+    for group_id in group_ids:
+        cursor.execute('SELECT * FROM UserBrick WHERE username = ? AND group_id = ?', (username, group_id))
+        exists = cursor.fetchone()
+        if exists:
+            cursor.execute('UPDATE UserBrick SET score = 0 WHERE username = ? AND group_id = ?', (username, group_id))
+            print(f"[DEBUG] Updated UserBrick: username={username}, group_id={group_id}")
+        else:
+            cursor.execute('INSERT INTO UserBrick (username, group_id, score) VALUES (?, ?, 0)', (username, group_id))
+            print(f"[DEBUG] Inserted UserBrick: username={username}, group_id={group_id}")
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 from flask import Blueprint, request, jsonify
 import sqlite3
@@ -65,10 +95,7 @@ def update_user_brick():
     data = request.get_json()
     username = data.get('username')
     group_id = data.get('group_id')
-    try:
-        score = float(data.get('score', 0))
-    except (TypeError, ValueError):
-        score = 0.0
+    score = data.get('score', 0)
     if not username or group_id is None:
         return jsonify({'error': 'Missing username or group_id'}), 400
     conn = get_db()
@@ -79,38 +106,6 @@ def update_user_brick():
         cursor.execute('UPDATE UserBrick SET score = ? WHERE username = ? AND group_id = ?', (score, username, group_id))
     else:
         cursor.execute('INSERT INTO UserBrick (username, group_id, score) VALUES (?, ?, ?)', (username, group_id, score))
-    conn.commit()
-    # Return the updated score
-    cursor.execute('SELECT score FROM UserBrick WHERE username = ? AND group_id = ?', (username, group_id))
-    updated_score = cursor.fetchone()[0]
-    conn.close()
-    return jsonify({'success': True, 'score': updated_score})
-
-@user_bp.route('/user_bricks/reset', methods=['POST'])
-def reset_user_bricks():
-    data = request.get_json()
-    username = data.get('username')
-    language = data.get('language')
-    print(f"[DEBUG] Resetting user bricks for username={username}, language={language}")
-    if not username:
-        return jsonify({'error': 'Missing username'}), 400
-    conn = get_db()
-    cursor = conn.cursor()
-    # Get all group_ids for the selected language
-    # Only reset existing UserBrick rows for this user and language
-    if language:
-        cursor.execute('SELECT group_id FROM Brick WHERE language = ?', (language,))
-        valid_group_ids = set(row[0] for row in cursor.fetchall())
-        cursor.execute('SELECT group_id FROM UserBrick WHERE username = ?', (username,))
-        user_group_ids = [row[0] for row in cursor.fetchall()]
-        group_ids_to_reset = [gid for gid in user_group_ids if gid in valid_group_ids]
-    else:
-        cursor.execute('SELECT group_id FROM UserBrick WHERE username = ?', (username,))
-        group_ids_to_reset = [row[0] for row in cursor.fetchall()]
-    print(f"[DEBUG] Found group_ids to reset: {group_ids_to_reset}")
-    for group_id in group_ids_to_reset:
-        cursor.execute('UPDATE UserBrick SET score = 0 WHERE username = ? AND group_id = ?', (username, group_id))
-        print(f"[DEBUG] Updated UserBrick: username={username}, group_id={group_id}")
     conn.commit()
     conn.close()
     return jsonify({'success': True})

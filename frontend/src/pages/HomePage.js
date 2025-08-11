@@ -6,7 +6,6 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [welcomeType, setWelcomeType] = useState('');
-  const [bricks, setBricks] = useState([]);
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
@@ -17,9 +16,6 @@ const HomePage = () => {
     }
     setUsername(storedUsername);
     setWelcomeType(storedWelcomeType);
-    fetch(`http://localhost:5000/user_bricks/${storedUsername}`)
-      .then(res => res.json())
-      .then(data => setBricks(data.bricks || []));
   }, [navigate]);
 
   const handleBrickModeClick = () => {
@@ -34,12 +30,12 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
+      <button className="homepage-logout-btn" onClick={handleLogout}>Logout</button>
       <div className="hero-section">
         <h1 className="hero-title">DuDuolingo</h1>
         <p className="hero-subtitle">
           {welcomeType === 'existing' ? `Welcome back, ${username}!` : `Welcome, ${username}!`}
         </p>
-        <button className="logout-button" onClick={handleLogout} style={{marginTop: '16px'}}>Logout</button>
       </div>
       <div className="main-content">
         <button 

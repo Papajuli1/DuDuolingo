@@ -4,6 +4,13 @@ import Brick from '../components/Brick';
 import './BrickModePage.css';
 
 const BrickModePage = () => {
+  const [showResetMsg, setShowResetMsg] = useState(false);
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('welcomeType');
+    navigate('/login');
+  };
   const navigate = useNavigate();
   const [bricks, setBricks] = useState([]);
   const [selectedBrick, setSelectedBrick] = useState(null);
@@ -88,37 +95,49 @@ const BrickModePage = () => {
   };
 
   const handleResetProgress = async () => {
-    // Try to reset on backend, but always update UI
-    fetch('http://localhost:5000/api/bricks/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ language })
-    }).finally(() => {
-      setSelectedBrick(null);
-      setBricks(prevBricks =>
-        prevBricks.map(brick =>
-          ((brick.brick_language && brick.brick_language === language) ||
-            (!brick.brick_language && brick.language === language))
-            ? { ...brick, completed: 0 }
-            : brick
-        )
+    // Reset only the current user's bricks for the selected language
+    const username = localStorage.getItem('username');
+    if (!username) return;
+    try {
+      await fetch(`http://localhost:5000/user_bricks/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, language })
+      });
+      // Update UI state
+      setUserBricks(prev =>
+        prev.map(ub => {
+          // Find the brick in filteredBricks to check language
+          const brick = bricks.find(b => b.group_id === ub.group_id);
+          if (brick && ((brick.brick_language && brick.brick_language === language) || (!brick.brick_language && brick.language === language))) {
+            return { ...ub, score: 0 };
+          }
+          return ub;
+        })
       );
+      setSelectedBrick(null);
       setError(null);
-    });
+  setShowResetMsg(true);
+  setTimeout(() => setShowResetMsg(false), 5000);
+    } catch (err) {
+      setError('Failed to reset progress');
+    }
   };
 
   // Callback for Brick to mark as completed
   const handleBrickCompleted = (groupId, score = 1) => {
+    // Convert score to percentage (0-100)
+    const scoreInt = Math.round(score * 100);
     setUserBricks(prev => {
       const idx = prev.findIndex(b => b.group_id === groupId);
       if (idx !== -1) {
         // Update score for existing entry
         const updated = [...prev];
-        updated[idx] = { ...updated[idx], score };
+        updated[idx] = { ...updated[idx], score: scoreInt };
         return updated;
       } else {
         // Add new entry
-        return [...prev, { group_id: groupId, score }];
+        return [...prev, { group_id: groupId, score: scoreInt }];
       }
     });
   };
@@ -198,6 +217,10 @@ const BrickModePage = () => {
 
   return (
     <div className="brickmode-container">
+      {!selectedBrick && <button className="brickmode-logout-btn" onClick={handleLogout}>Logout</button>}
+      {showResetMsg && (
+        <div className="brickmode-reset-msg">Progress has been reset!</div>
+      )}
       <div className="brickmode-header">
         <h1>Brick Mode</h1>
         <p>Choose a brick to practice with:</p>
