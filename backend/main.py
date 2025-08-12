@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from BrickMode import register_brick_routes
-from user import user_bp
+from database.user import user_bp
 
 def create_app():
     app = Flask(__name__)
