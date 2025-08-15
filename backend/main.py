@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from BrickMode import register_brick_routes
 from database.user import user_bp
@@ -15,8 +15,16 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(detect_bp)
 
+    # --- Serve video files ---
+    @app.route('/data/videos/<filename>')
+    def serve_video(filename):
+        return send_from_directory('data/videos', filename)
+    # ------------------------
+
     return app
 
 if __name__ == '__main__':
+    from database.db_helper import get_all_steps
+    print(get_all_steps())
     app = create_app()
     app.run(debug=True, port=5000)

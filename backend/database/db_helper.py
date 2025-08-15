@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import sys
 
 DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'duduolingo.db')
 
@@ -206,8 +207,13 @@ def get_all_steps():
     steps = cursor.fetchall()
     conn.close()
     step_list = []
+    print("DEBUG: get_all_steps called")  # Confirm function is running
+    sys.stdout.flush()
     for step in steps:
+        print("\n--- STEP DEBUG ---")
         step_dict = dict(zip(column_names, step))
+        print("DEBUG step_dict:", step_dict)
+        sys.stdout.flush()
         words = []
         for i in range(1, 9):
             word_text = step_dict.get(f'word{i}')
@@ -225,13 +231,22 @@ def get_all_steps():
             import os
             image_filename = os.path.basename(image_path)
             image_url = f'/data/images/{image_filename}'
+        # Find the correct key for the video field from the debug output
+        video_path = step_dict.get('video')  # Change 'video' to the actual key if needed
+        video_url = None
+        if video_path and video_path.strip():
+            import os
+            video_filename = os.path.basename(video_path.strip())
+            video_url = f'/data/videos/{video_filename}'
         step_list.append({
             'group_id': step_dict.get('group_id'),
             'language': step_dict.get('language', ''),
             'day': step_dict.get('day', 1),
             'image_url': image_url,
             'words': words,
-            'video': step_dict.get('video', ''),
+            'video': video_url
         })
+    print("DEBUG: get_all_steps finished")
+    sys.stdout.flush()
     return step_list
 

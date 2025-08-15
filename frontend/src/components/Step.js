@@ -194,7 +194,7 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
   };
 
   const getVideoUrl = (video) => {
-    if (!video) return '';
+    if (!video || video === 'null') return null;
     // Use the value directly, it's already a public path
     return video;
   };
@@ -213,9 +213,15 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
           {stepData.completed ? 'Completed' : 'In Progress'}
         </span>
       </div>
-      {/* Only show image before completion */}
+      {/* Show image before completion */}
       {!allGoodClicked && stepData.image_url && (
-        <div className="step-image-container" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <div className="step-image-container" style={{
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '320px'
+        }}>
           <img 
             ref={imageRef}
             src={stepData.image_url} 
@@ -224,7 +230,14 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
             onError={(e) => {
               e.target.style.display = 'none';
             }}
-            style={{ display: 'block', maxWidth: '100%', height: 'auto', margin: '0 auto' }}
+            style={{
+              width: '320px',
+              height: '320px',
+              borderRadius: '18px',
+              objectFit: 'cover',
+              display: 'block',
+              margin: '0 auto'
+            }}
           />
           <div
             ref={overlayRef}
@@ -236,24 +249,42 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
           />
         </div>
       )}
-      {/* Only show video after completion if available */}
-      {allGoodClicked && stepData.video && (
-        <div className="step-video-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+      {/* After completion: show video if available, otherwise show image */}
+      {allGoodClicked && getVideoUrl(stepData.video) && (
+        <div className="step-image-container" style={{
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '320px'
+        }}>
           <video
             src={getVideoUrl(stepData.video)}
-            controls
             autoPlay
             muted
             poster={stepData.image_url || undefined}
-            style={{ maxWidth: '100%', height: 'auto', margin: '0 auto', borderRadius: '12px', boxShadow: '0 2px 16px rgba(0,0,0,0.12)' }}
-          >
-            Sorry, your browser does not support embedded videos.
-          </video>
+            controls={false}
+            style={{
+              width: '320px',
+              height: '320px',
+              borderRadius: '18px',
+              objectFit: 'cover',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.12)',
+              display: 'block',
+              margin: '0 auto'
+            }}
+          />
         </div>
       )}
-      {/* Fallback: if no video, show image even after completion */}
-      {allGoodClicked && !stepData.video && stepData.image_url && (
-        <div className="step-image-container" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+      {/* Fallback: show image if no video after completion */}
+      {allGoodClicked && !getVideoUrl(stepData.video) && stepData.image_url && (
+        <div className="step-image-container" style={{
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '320px'
+        }}>
           <img 
             ref={imageRef}
             src={stepData.image_url} 
@@ -262,7 +293,14 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
             onError={(e) => {
               e.target.style.display = 'none';
             }}
-            style={{ display: 'block', maxWidth: '100%', height: 'auto', margin: '0 auto' }}
+            style={{
+              width: '320px',
+              height: '320px',
+              borderRadius: '18px',
+              objectFit: 'cover',
+              display: 'block',
+              margin: '0 auto'
+            }}
           />
         </div>
       )}
