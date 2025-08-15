@@ -1,0 +1,117 @@
+.stepmode-reset-msg {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  background: #1cb0f6;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  z-index: 100;
+  animation: fadeInOut 5s linear;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.stepmode-logout-btn {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  background: linear-gradient(90deg, #58cc02 0%, #1cb0f6 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+.stepmode-logout-btn:hover {
+  background: linear-gradient(90deg, #1cb0f6 0%, #58cc02 100%);
+}
+.stepmode-container {
+  padding: 40px 20px;
+}
+.stepmode-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.stepmode-back-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #58cc02;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+.stepmode-home-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #ccc;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.stepmode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.stepmode-card {
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+.stepmode-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+.stepmode-card-title {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+.stepmode-card-level {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+.stepmode-card-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: contain;
+  margin-top: 10px;
+}
+.stepmode-loading,
+.stepmode-error {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+.stepmode-individual {
+  padding: 40px 20px;
+}
+.stepmode-individual-header {
+  margin-bottom: 20px;
+}
+.stepmode-card-completed {
+  border-color: #58cc02;
+  box-shadow: 0 0 8px #58cc02;
+}

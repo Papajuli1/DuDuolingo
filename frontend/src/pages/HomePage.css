@@ -110,3 +110,36 @@
 .section {
   text-align: center;
 }
+.haki-week-button {
+  background: #ffb300 !important;
+  color: #333 !important;
+  border: 3px solid #ffb300 !important;
+  padding: 0 !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12) !important;
+  display: block !important;
+  width: 240px !important;
+  margin: 20px auto !important;
+  min-height: 80px !important;
+  position: relative;
+  overflow: hidden;
+}
+.haki-week-button:hover {
+  background: #ffa000 !important;
+}
+.haki-week-video-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.haki-week-label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-left: 8px;
+}

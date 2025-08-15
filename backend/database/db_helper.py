@@ -195,3 +195,43 @@ def get_completed_bricks():
     conn.close()
     return ids
 
+def get_all_steps():
+    """Get all steps from the Step table"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('PRAGMA table_info(Step)')
+    columns_info = cursor.fetchall()
+    column_names = [col[1] for col in columns_info]
+    cursor.execute('SELECT * FROM Step')
+    steps = cursor.fetchall()
+    conn.close()
+    step_list = []
+    for step in steps:
+        step_dict = dict(zip(column_names, step))
+        words = []
+        for i in range(1, 9):
+            word_text = step_dict.get(f'word{i}')
+            word_def = step_dict.get(f'definition{i}')
+            word_type = step_dict.get(f'type{i}')
+            if word_text and word_text.strip():
+                words.append({
+                    'text': word_text,
+                    'definition': word_def if word_def else '',
+                    'type': word_type if word_type else ''
+                })
+        image_path = step_dict.get('image')
+        image_url = None
+        if image_path:
+            import os
+            image_filename = os.path.basename(image_path)
+            image_url = f'/data/images/{image_filename}'
+        step_list.append({
+            'group_id': step_dict.get('group_id'),
+            'language': step_dict.get('language', ''),
+            'day': step_dict.get('day', 1),
+            'image_url': image_url,
+            'words': words,
+            'video': step_dict.get('video', ''),
+        })
+    return step_list
+

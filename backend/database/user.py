@@ -5,6 +5,51 @@ from database.db_helper import get_connection
 
 user_bp = Blueprint('user', __name__)
 
+@user_bp.route('/user_steps/<username>', methods=['GET'])
+def user_steps(username):
+    conn = get_db()
+    cursor = conn.cursor()
+    # Get all steps
+    cursor.execute('SELECT group_id FROM Step')
+    step_ids = [row[0] for row in cursor.fetchall()]
+    # Get user scores
+    cursor.execute('SELECT group_id, score FROM UserStep WHERE username = ?', (username,))
+    user_scores = {row[0]: row[1] for row in cursor.fetchall()}
+    # Build result
+    result = []
+    total_score = 0
+    for group_id in step_ids:
+        score = user_scores.get(group_id, 0)
+        total_score += score
+        result.append({'group_id': group_id, 'score': score})
+    conn.close()
+    return jsonify({'username': username, 'steps': result, 'total_score': total_score})
+
+@user_bp.route('/user_step', methods=['POST'])
+def update_user_step():
+    data = request.get_json()
+    username = data.get('username')
+    group_id = data.get('group_id')
+    try:
+        score = float(data.get('score', 0))
+    except (TypeError, ValueError):
+        score = 0.0
+    if not username or group_id is None:
+        return jsonify({'error': 'Missing username or group_id'}), 400
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM UserStep WHERE username = ? AND group_id = ?', (username, group_id))
+    exists = cursor.fetchone()
+    if exists:
+        cursor.execute('UPDATE UserStep SET score = ? WHERE username = ? AND group_id = ?', (score, username, group_id))
+    else:
+        cursor.execute('INSERT INTO UserStep (username, group_id, score) VALUES (?, ?, ?)', (username, group_id, score))
+    conn.commit()
+    cursor.execute('SELECT score FROM UserStep WHERE username = ? AND group_id = ?', (username, group_id))
+    updated_score = cursor.fetchone()[0]
+    conn.close()
+    return jsonify({'success': True, 'score': updated_score})
+
 # Leaderboard route (now after user_bp definition)
 @user_bp.route('/leaderboard', methods=['GET'])
 def leaderboard():

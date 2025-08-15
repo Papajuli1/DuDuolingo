@@ -95,21 +95,20 @@ const BrickModePage = () => {
   };
 
   const handleResetProgress = async () => {
-    // Reset only the current user's bricks for the selected language
     const username = localStorage.getItem('username');
     if (!username) return;
+    // Make sure language is either 'Spanish' or 'German'
+    const validLanguage = (language === 'Spanish' || language === 'German') ? language : 'Spanish';
     try {
       await fetch(`http://localhost:5000/user_bricks/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, language })
+        body: JSON.stringify({ username, language: validLanguage })
       });
-      // Update UI state
       setUserBricks(prev =>
         prev.map(ub => {
-          // Find the brick in filteredBricks to check language
           const brick = bricks.find(b => b.group_id === ub.group_id);
-          if (brick && ((brick.brick_language && brick.brick_language === language) || (!brick.brick_language && brick.language === language))) {
+          if (brick && ((brick.brick_language && brick.brick_language === validLanguage) || (!brick.brick_language && brick.language === validLanguage))) {
             return { ...ub, score: 0 };
           }
           return ub;
@@ -117,8 +116,8 @@ const BrickModePage = () => {
       );
       setSelectedBrick(null);
       setError(null);
-  setShowResetMsg(true);
-  setTimeout(() => setShowResetMsg(false), 5000);
+      setShowResetMsg(true);
+      setTimeout(() => setShowResetMsg(false), 5000);
     } catch (err) {
       setError('Failed to reset progress');
     }

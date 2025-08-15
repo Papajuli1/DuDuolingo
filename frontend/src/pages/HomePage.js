@@ -41,12 +41,21 @@ const HomePage = () => {
           {welcomeType === 'existing' ? `Welcome back, ${username}!` : `Welcome, ${username}!`}
         </p>
       </div>
-      <div className="main-content">
+      <div className="main-content" style={{display: 'flex', justifyContent: 'center', gap: '24px'}}>
         <button 
           className="brick-mode-button"
           onClick={handleBrickModeClick}
         >
           Start Brick Mode
+        </button>
+        <button
+          className="haki-week-button"
+          onClick={() => navigate('/step-mode')}
+        >
+          <div className="haki-week-video-wrapper">
+            <video src="/videos/Daily-0-video.mp4" width="220" height="60" autoPlay loop muted style={{borderRadius: '8px', background: '#000'}} />
+            <span className="haki-week-label">Haki Week Journey</span>
+          </div>
         </button>
         <button
           className="leaderboard-button"
