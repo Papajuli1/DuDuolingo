@@ -6,12 +6,14 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   const [clickedIndices, setClickedIndices] = useState([]);
   const [selectedWordIdx, setSelectedWordIdx] = useState(null);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const [hintCount, setHintCount] = useState(0);
+  const [lockedScore, setLockedScore] = useState(null);
   const imageRef = useRef();
   const overlayRef = useRef();
   const lastBox = useRef(null);
 
   // All hooks must be top-level, never conditional
-  const drawBox = useCallback((bbox, confidence, label) => {
+  const drawBox = useCallback((bbox, confidence, label, hideLabel = false) => {
     if (!overlayRef.current || !imageRef.current) return;
     overlayRef.current.innerHTML = '';
     const [x, y, w, h] = bbox;
@@ -43,27 +45,29 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       pointerEvents: 'none',
       zIndex: '11',
     });
-    // Object label only (no percentage)
-    const confLabel = document.createElement('div');
-    confLabel.textContent = `${label || ''}`;
-    Object.assign(confLabel.style, {
-      position: 'absolute',
-      left: `${px}px`,
-      top: `${Math.max(py - 28, 0)}px`,
-      background: '#2ecc40',
-      color: '#fff',
-      padding: '2px 8px',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: 'bold',
-      pointerEvents: 'none',
-      zIndex: '12',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-      userSelect: 'none',
-    });
     overlayRef.current.appendChild(box);
-    overlayRef.current.appendChild(confLabel);
-    lastBox.current = { bbox, confidence, label };
+    if (!hideLabel) {
+      // Object label only (no percentage)
+      const confLabel = document.createElement('div');
+      confLabel.textContent = `${label || ''}`;
+      Object.assign(confLabel.style, {
+        position: 'absolute',
+        left: `${px}px`,
+        top: `${Math.max(py - 28, 0)}px`,
+        background: '#2ecc40',
+        color: '#fff',
+        padding: '2px 8px',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        pointerEvents: 'none',
+        zIndex: '12',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+        userSelect: 'none',
+      });
+      overlayRef.current.appendChild(confLabel);
+    }
+    lastBox.current = { bbox, confidence, label, hideLabel };
   }, []);
 
   const clearOverlay = useCallback(() => {
@@ -73,7 +77,12 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
 
   const redrawBox = useCallback(() => {
     if (lastBox.current && imageRef.current) {
-      drawBox(lastBox.current.bbox, lastBox.current.confidence, lastBox.current.label);
+      drawBox(
+        lastBox.current.bbox,
+        lastBox.current.confidence,
+        lastBox.current.label,
+        lastBox.current.hideLabel
+      );
     }
   }, [drawBox]);
 
@@ -103,6 +112,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   useEffect(() => {
     // Reset local completion state when brick changes
     setHasCompleted(false);
+    setHintCount(0); // Reset hint count when brick changes
   }, [brickData, brickData?.group_id]);
 
   useEffect(() => {
@@ -118,7 +128,9 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       const goodClicked = randomizedWords.filter((w, idx) => w.type === "Good" && clickedIndices.includes(idx)).length;
       const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
       const totalClicked = goodClicked + badClicked;
-      const score = totalClicked > 0 ? Math.round((goodClicked / totalClicked) * 100) : 0;
+      let score = totalClicked > 0 ? Math.round((goodClicked / totalClicked) * 100) : 0;
+      score = Math.max(0, score - 20 * hintCount);
+      setLockedScore(score);
       // Send score to backend
       const username = localStorage.getItem('username');
       fetch('http://localhost:5000/user_brick', {
@@ -132,7 +144,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
         onBrickCompleted(brickData.group_id || brickData.id, score);
       }
     }
-  }, [allGoodClicked, brickData, onBrickCompleted, hasCompleted, randomizedWords, clickedIndices]);
+  }, [allGoodClicked, brickData, onBrickCompleted, hasCompleted, randomizedWords, clickedIndices, hintCount]);
 
   useEffect(() => {
     const img = imageRef.current;
@@ -223,12 +235,64 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
     }
   };
 
+  const handleHint = async () => {
+    let unclickedGoodIndices = randomizedWords
+      .map((word, idx) => word.type === "Good" && !clickedIndices.includes(idx) ? idx : null)
+      .filter(idx => idx !== null);
+
+    if (unclickedGoodIndices.length === 0 || hintCount >= 2) return;
+
+    // Try each unclicked good word until a detection is found
+    let found = false;
+    for (let i = 0; i < unclickedGoodIndices.length; i++) {
+      const idx = unclickedGoodIndices[i];
+      const word = randomizedWords[idx];
+      if (imageRef.current && word.definition) {
+        try {
+          let blob;
+          if (imageRef.current.src.startsWith('data:')) {
+            const res = await fetch(imageRef.current.src);
+            blob = await res.blob();
+          } else {
+            const canvas = document.createElement('canvas');
+            canvas.width = imageRef.current.naturalWidth;
+            canvas.height = imageRef.current.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imageRef.current, 0, 0);
+            blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          }
+          const formData = new FormData();
+          formData.append('file', blob, 'scene.png');
+          const url = `http://localhost:5000/detect?target=${encodeURIComponent(word.definition)}`;
+          const resp = await fetch(url, { method: 'POST', body: formData });
+          const data = await resp.json();
+          if (resp.ok && typeof data === 'object' && data.found && Array.isArray(data.bbox) && data.bbox.length === 4) {
+            drawBox(data.bbox, data.confidence, '', true); // Hide label
+            found = true;
+            break;
+          }
+        } catch (err) {
+          // ignore and try next
+        }
+      }
+    }
+    // If none found, just clear overlay (no green box)
+    if (!found) {
+      clearOverlay();
+    }
+    setHintCount(hintCount + 1);
+  };
+
   if (!brickData) {
     return <div className="brick-container">No brick data available</div>;
   }
 
   return (
     <div className="brick-container">
+      {/* Short explanation above the brick */}
+      <div className="brick-explanation">
+        Select all the words that you recognize in the image. You can use up to 2 hints, but each hint reduces your score.
+      </div>
       <div className="brick-header">
         <h3 className="brick-title">{brickData.brick}</h3>
         <span className={`brick-level${brickData.completed ? ' brick-level-completed' : ''}`}>
@@ -237,7 +301,25 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       </div>
       
       {brickData.image_url && (
-        <div className="brick-image-container" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <div className="brick-image-container" style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px'
+        }}>
+          {/* Hint Button above the image */}
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginBottom: '12px', position: 'relative', zIndex: 21 }}>
+            <button
+              className={`brick-hint-btn${hintCount >= 2 ? ' brick-hint-btn-disabled' : ''}`}
+              onClick={handleHint}
+              type="button"
+              disabled={hintCount >= 2}
+            >
+              {hintCount < 2 ? `Hint (-20) [${2 - hintCount} left]` : 'No hints left'}
+            </button>
+          </div>
           <img 
             ref={imageRef}
             src={brickData.image_url} 
@@ -297,6 +379,9 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       {allGoodClicked && (
         <div className="brick-success">
           <p className="brick-success-message">Good Job!</p>
+          <p className="brick-score-message">
+            Score: {lockedScore !== null ? lockedScore : ''}
+          </p>
           <button className="brick-success-btn" onClick={onContinue}>
             Continue to the next Brick
           </button>

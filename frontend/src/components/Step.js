@@ -7,11 +7,12 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
   const [clickedIndices, setClickedIndices] = useState([]);
   const [selectedWordIdx, setSelectedWordIdx] = useState(null);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const [hintCount, setHintCount] = useState(0);
   const imageRef = useRef();
   const overlayRef = useRef();
   const lastBox = useRef(null);
 
-  const drawBox = useCallback((bbox, confidence, label) => {
+  const drawBox = useCallback((bbox, confidence, label, hideLabel = false) => {
     if (!overlayRef.current || !imageRef.current) return;
     overlayRef.current.innerHTML = '';
     const [x, y, w, h] = bbox;
@@ -39,26 +40,28 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
       pointerEvents: 'none',
       zIndex: '11',
     });
-    const confLabel = document.createElement('div');
-    confLabel.textContent = `${label || ''}`;
-    Object.assign(confLabel.style, {
-      position: 'absolute',
-      left: `${px}px`,
-      top: `${Math.max(py - 28, 0)}px`,
-      background: '#2ecc40',
-      color: '#fff',
-      padding: '2px 8px',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: 'bold',
-      pointerEvents: 'none',
-      zIndex: '12',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-      userSelect: 'none',
-    });
     overlayRef.current.appendChild(box);
-    overlayRef.current.appendChild(confLabel);
-    lastBox.current = { bbox, confidence, label };
+    if (!hideLabel) {
+      const confLabel = document.createElement('div');
+      confLabel.textContent = `${label || ''}`;
+      Object.assign(confLabel.style, {
+        position: 'absolute',
+        left: `${px}px`,
+        top: `${Math.max(py - 28, 0)}px`,
+        background: '#2ecc40',
+        color: '#fff',
+        padding: '2px 8px',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        pointerEvents: 'none',
+        zIndex: '12',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+        userSelect: 'none',
+      });
+      overlayRef.current.appendChild(confLabel);
+    }
+    lastBox.current = { bbox, confidence, label, hideLabel };
   }, []);
 
   const clearOverlay = useCallback(() => {
@@ -68,7 +71,7 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
 
   const redrawBox = useCallback(() => {
     if (lastBox.current && imageRef.current) {
-      drawBox(lastBox.current.bbox, lastBox.current.confidence, lastBox.current.label);
+      drawBox(lastBox.current.bbox, lastBox.current.confidence, lastBox.current.label, lastBox.current.hideLabel);
     }
   }, [drawBox]);
 
@@ -94,6 +97,7 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
 
   useEffect(() => {
     setHasCompleted(false);
+    setHintCount(0); // Reset hint count when step changes
   }, [stepData, stepData?.group_id]);
 
   useEffect(() => {
@@ -109,7 +113,8 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
       const goodClicked = randomizedWords.filter((w, idx) => w.type === "Good" && clickedIndices.includes(idx)).length;
       const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
       const totalClicked = goodClicked + badClicked;
-      const score = totalClicked > 0 ? Math.round((goodClicked / totalClicked) * 100) : 0;
+      let score = totalClicked > 0 ? Math.round((goodClicked / totalClicked) * 100) : 0;
+      score = Math.max(0, score - 20 * hintCount);
       setLockedScore(score);
       const username = localStorage.getItem('username');
       fetch('http://localhost:5000/user_step', {
@@ -120,7 +125,7 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
       // Do NOT call onStepCompleted here!
       // Only call onStepCompleted when user clicks the button below.
     }
-  }, [allGoodClicked, stepData, onStepCompleted, hasCompleted, randomizedWords, clickedIndices]);
+  }, [allGoodClicked, stepData, onStepCompleted, hasCompleted, randomizedWords, clickedIndices, hintCount]);
 
   useEffect(() => {
     const img = imageRef.current;
@@ -208,6 +213,54 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
     }
   };
 
+  const handleHint = async () => {
+    let unclickedGoodIndices = randomizedWords
+      .map((word, idx) => word.type === "Good" && !clickedIndices.includes(idx) ? idx : null)
+      .filter(idx => idx !== null);
+
+    if (unclickedGoodIndices.length === 0 || hintCount >= 2) return;
+
+    // Try each unclicked good word until a detection is found
+    let found = false;
+    for (let i = 0; i < unclickedGoodIndices.length; i++) {
+      const idx = unclickedGoodIndices[i];
+      const word = randomizedWords[idx];
+      if (imageRef.current && word.definition) {
+        try {
+          let blob;
+          if (imageRef.current.src.startsWith('data:')) {
+            const res = await fetch(imageRef.current.src);
+            blob = await res.blob();
+          } else {
+            const canvas = document.createElement('canvas');
+            canvas.width = imageRef.current.naturalWidth;
+            canvas.height = imageRef.current.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imageRef.current, 0, 0);
+            blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          }
+          const formData = new FormData();
+          formData.append('file', blob, 'scene.png');
+          const url = `http://localhost:5000/detect?target=${encodeURIComponent(word.definition)}`;
+          const resp = await fetch(url, { method: 'POST', body: formData });
+          const data = await resp.json();
+          if (resp.ok && typeof data === 'object' && data.found && Array.isArray(data.bbox) && data.bbox.length === 4) {
+            drawBox(data.bbox, data.confidence, '', true); // Hide label
+            found = true;
+            break;
+          }
+        } catch (err) {
+          // ignore and try next
+        }
+      }
+    }
+    // If none found, just clear overlay (no green box)
+    if (!found) {
+      clearOverlay();
+    }
+    setHintCount(hintCount + 1);
+  };
+
   const getVideoUrl = (video) => {
     if (!video || video === 'null') return null;
     // Use the value directly, it's already a public path
@@ -222,6 +275,10 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
 
   return (
     <div className="step-container">
+      {/* Instruction above the step */}
+      <div className="step-explanation">
+        Select all the words that you recognize in the image. You can use up to 2 hints, but each hint reduces your score.
+      </div>
       <div className="step-header">
         <h3 className="step-title">{stepData.language} Day {stepData.day}</h3>
         <span className={`step-level${stepData.completed ? ' step-level-completed' : ''}`}>
@@ -233,10 +290,22 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
         <div className="step-image-container" style={{
           position: 'relative',
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '320px'
+          height: '340px'
         }}>
+          {/* Hint Button above the image */}
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginBottom: '12px', position: 'relative', zIndex: 21 }}>
+            <button
+              className={`step-hint-btn${hintCount >= 2 ? ' step-hint-btn-disabled' : ''}`}
+              onClick={handleHint}
+              type="button"
+              disabled={hintCount >= 2}
+            >
+              {hintCount < 2 ? `Hint (-20) [${2 - hintCount} left]` : 'No hints left'}
+            </button>
+          </div>
           <img 
             ref={imageRef}
             src={stepData.image_url} 
