@@ -29,31 +29,23 @@ def register_brick_routes(app):
     @app.route('/api/bricks', methods=['GET'])
     def get_bricks():
         try:
-            print("=== Starting get_bricks function ===")
             conn = get_connection()
             cursor = conn.cursor()
             cursor.execute('PRAGMA table_info(Brick)')
             columns_info = cursor.fetchall()
             column_names = [col[1] for col in columns_info]
-            print(f"Brick table columns: {column_names}")
 
             if 'completed' not in column_names:
-                print("ERROR: 'completed' column missing from Brick table. Please run:")
-                print("ALTER TABLE Brick ADD COLUMN completed INTEGER DEFAULT 0;")
                 return jsonify({'error': "'completed' column missing from Brick table"}), 500
 
             try:
                 cursor.execute('SELECT * FROM Brick')
                 bricks = cursor.fetchall()
             except Exception as sql_err:
-                print(f"SQL Error: {sql_err}")
-                import traceback
-                traceback.print_exc()
                 conn.close()
                 return jsonify({'error': f'SQL Error: {sql_err}'}), 500
 
             conn.close()
-            print(f"Found {len(bricks)} bricks")
 
             brick_list = []
             for brick in bricks:
@@ -88,17 +80,10 @@ def register_brick_routes(app):
                     }
                     brick_list.append(filtered_dict)
                 except Exception as row_err:
-                    print(f"Error processing brick row: {row_err}")
-                    import traceback
-                    traceback.print_exc()
                     continue
 
-            print(f"=== Returning {len(brick_list)} processed bricks ===")
             return jsonify(brick_list)
         except Exception as e:
-            print(f"=== ERROR in get_bricks: {str(e)} ===")
-            import traceback
-            traceback.print_exc()
             return jsonify({'error': str(e), 'type': str(type(e).__name__)}), 500
 
     # Removed global brick completion logic. Completion is now tracked per user in UserBrick table.

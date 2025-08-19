@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Brick.css';
 
 const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
-  const [lockedScore, setLockedScore] = useState(null);
   const [randomizedWords, setRandomizedWords] = useState([]);
   const [clickedIndices, setClickedIndices] = useState([]);
   const [selectedWordIdx, setSelectedWordIdx] = useState(null);
@@ -81,6 +80,8 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   useEffect(() => {
     // Always clear detection overlay immediately when brick changes
     if (overlayRef.current) overlayRef.current.innerHTML = '';
+    // Play start sound when brick loads
+    playSound('start_sound.mp3');
   }, [brickData, brickData?.group_id]);
 
   useEffect(() => {
@@ -118,7 +119,6 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       const badClicked = randomizedWords.filter((w, idx) => w.type === "Bad" && clickedIndices.includes(idx)).length;
       const totalClicked = goodClicked + badClicked;
       const score = totalClicked > 0 ? Math.round((goodClicked / totalClicked) * 100) : 0;
-      setLockedScore(score);
       // Send score to backend
       const username = localStorage.getItem('username');
       fetch('http://localhost:5000/user_brick', {
@@ -128,6 +128,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       });
       // Notify parent to update completed status and score
       if (onBrickCompleted) {
+        // The parent receives the score here and can use it to show different styles in the brick list
         onBrickCompleted(brickData.group_id || brickData.id, score);
       }
     }
@@ -152,6 +153,13 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
     };
   }, [redrawBox, clearOverlay]);
 
+  // Helper to play a sound file
+  const playSound = (filename) => {
+    const audio = new window.Audio(`http://localhost:5000/sound/${filename}`);
+    audio.volume = 0.15;
+    audio.play();
+  };
+
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -162,6 +170,12 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   };
 
   const handleWordClick = async (word, index) => {
+    // Play sound for good/bad word immediately
+    if (word.type === 'Good') {
+      playSound('right_answer.mp3');
+    } else if (word.type === 'Bad') {
+      playSound('wrong_answer.mp3');
+    }
     // Prevent further clicks from affecting score after completion
     if (!clickedIndices.includes(index) && !allGoodClicked) {
       setClickedIndices([...clickedIndices, index]);
@@ -283,10 +297,6 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
       {allGoodClicked && (
         <div className="brick-success">
           <p className="brick-success-message">Good Job!</p>
-          {/* Show score as integer out of 100, locked after completion */}
-          <p className="brick-score-message">
-            Score: {lockedScore !== null ? lockedScore : ''}
-          </p>
           <button className="brick-success-btn" onClick={onContinue}>
             Continue to the next Brick
           </button>

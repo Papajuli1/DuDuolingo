@@ -21,10 +21,16 @@ def create_app():
         return send_from_directory('data/videos', filename)
     # ------------------------
 
+    # --- Serve sound files ---
+    @app.route('/sound/<filename>')
+    def serve_sound(filename):
+        return send_from_directory('data/sounds', filename)
+    # ------------------------
+
     return app
 
 if __name__ == '__main__':
-    from database.db_helper import get_all_steps
-    print(get_all_steps())
+    app = create_app()
+    app.run(debug=True, port=5000)
     app = create_app()
     app.run(debug=True, port=5000)

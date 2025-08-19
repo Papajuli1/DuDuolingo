@@ -174,3 +174,25 @@
   color: #58cc02;
   font-weight: bold;
 }
+
+.brickmode-card-perfect {
+  border: 2.5px solid #2ecc40;
+  background: linear-gradient(90deg, #eaffd0 0%, #d0ffe7 100%);
+  box-shadow: 0 0 8px #2ecc40a0;
+}
+.brickmode-card-status-perfect {
+  color: #2ecc40;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.brickmode-card-partial {
+  border: 2.5px solid #f1c40f;
+  background: linear-gradient(90deg, #fffbe6 0%, #fff6d0 100%);
+  box-shadow: 0 0 8px #f1c40fa0;
+}
+.brickmode-card-status-partial {
+  color: #f1c40f;
+  font-weight: bold;
+  margin-top: 6px;
+}

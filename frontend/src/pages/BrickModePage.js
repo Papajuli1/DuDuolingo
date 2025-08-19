@@ -78,7 +78,22 @@ const BrickModePage = () => {
     setSelectedBrick(brick);
   };
 
-  const handleBackToBricksList = () => {
+  // Helper to refresh user bricks from backend
+  const refreshUserBricks = async () => {
+    const username = localStorage.getItem('username');
+    if (username) {
+      try {
+        const res = await fetch(`http://localhost:5000/user_bricks/${username}`);
+        const data = await res.json();
+        setUserBricks(data.bricks || []);
+      } catch (err) {
+        // Optionally handle error
+      }
+    }
+  };
+
+  const handleBackToBricksList = async () => {
+    await refreshUserBricks(); // Ensure latest scores before showing list
     setSelectedBrick(null);
   };
 
@@ -124,7 +139,7 @@ const BrickModePage = () => {
   };
 
   // Callback for Brick to mark as completed
-  const handleBrickCompleted = (groupId, score = 1) => {
+  const handleBrickCompleted = async (groupId, score = 1) => {
     // Convert score to percentage (0-100)
     const scoreInt = Math.round(score * 100);
     setUserBricks(prev => {
@@ -139,6 +154,8 @@ const BrickModePage = () => {
         return [...prev, { group_id: groupId, score: scoreInt }];
       }
     });
+    // Optionally refresh immediately, but main refresh is on back to list
+    // await refreshUserBricks();
   };
 
   if (loading) {
@@ -267,12 +284,21 @@ const BrickModePage = () => {
               <div className="brickmode-level-grid">
                 {bricksInLevel.map((brick, idx) => {
                   const userBrick = userBricks.find(ub => ub.group_id === brick.group_id);
-                  const isCompleted = userBrick && userBrick.score && userBrick.score !== 0;
+                  // Only treat as completed if score > 0 and score is not null/undefined
+                  const isCompleted = userBrick && typeof userBrick.score === 'number' && userBrick.score > 0;
                   const isUnlocked = brick.level <= unlockedLevel;
+                  const isPerfect = isCompleted && userBrick.score === 100;
+                  const isPartial = isCompleted && userBrick.score < 100;
+                  const showPressToStart = !isCompleted && isUnlocked;
                   return (
                     <div
                       key={brick.group_id}
-                      className={`brickmode-card${isCompleted ? ' brickmode-card-completed' : ''}${!isUnlocked ? ' brickmode-card-locked' : ''}`}
+                      className={
+                        `brickmode-card` +
+                        (isPerfect ? ' brickmode-card-perfect' : '') +
+                        (isPartial ? ' brickmode-card-partial' : '') +
+                        (!isUnlocked ? ' brickmode-card-locked' : '')
+                      }
                       onClick={isUnlocked ? () => handleBrickClick(brick) : undefined}
                       style={{ pointerEvents: isUnlocked ? 'auto' : 'none' }}
                       title={!isUnlocked ? 'Complete all previous bricks to unlock this level' : ''}
@@ -280,12 +306,7 @@ const BrickModePage = () => {
                       <h3 className="brickmode-card-title">
                         {!isUnlocked && (
                           <span style={{marginRight: '8px', verticalAlign: 'middle'}}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="10" cy="10" r="10" fill="#bbb" />
-                              <path d="M6 10V8a4 4 0 1 1 8 0v2" stroke="#666" strokeWidth="1.5" fill="none" />
-                              <rect x="6" y="10" width="8" height="5" rx="1.5" fill="#eee" stroke="#666" strokeWidth="1.5" />
-                              <circle cx="10" cy="12.5" r="1" fill="#666" />
-                            </svg>
+                            {/* ...existing lock SVG... */}
                           </span>
                         )}
                         {brick.brick}
@@ -300,6 +321,25 @@ const BrickModePage = () => {
                         <p className="brickmode-card-def">
                           {brick.definition.substring(0, 100)}...
                         </p>
+                      )}
+                      {/* Show completion status only if completed */}
+                      {isPerfect && (
+                        <div className="brickmode-card-status brickmode-card-status-perfect">
+                          <span role="img" aria-label="perfect" style={{marginRight:'6px'}}>🏆</span>
+                          Perfect!
+                        </div>
+                      )}
+                      {isPartial && (
+                        <div className="brickmode-card-status brickmode-card-status-partial">
+                          <span role="img" aria-label="partial" style={{marginRight:'6px'}}>✅</span>
+                          Completed
+                        </div>
+                      )}
+                      {/* Show "Press to start" for unlocked, not completed bricks */}
+                      {showPressToStart && (
+                        <div className="brickmode-card-status" style={{color:'#1cb0f6', fontWeight:'bold', marginTop:'6px'}}>
+                          Press to start
+                        </div>
                       )}
                     </div>
                   );

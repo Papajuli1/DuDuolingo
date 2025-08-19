@@ -74,6 +74,8 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
 
   useEffect(() => {
     if (overlayRef.current) overlayRef.current.innerHTML = '';
+    // Play start sound when step loads
+    playSound('start_sound.mp3');
   }, [stepData, stepData?.group_id]);
 
   useEffect(() => {
@@ -139,6 +141,13 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
     };
   }, [redrawBox, clearOverlay]);
 
+  // Helper to play a sound file
+  const playSound = (filename) => {
+    const audio = new window.Audio(`http://localhost:5000/sound/${filename}`);
+    audio.volume = 0.15;
+    audio.play();
+  };
+
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -149,6 +158,12 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
   };
 
   const handleWordClick = async (word, index) => {
+    // Play sound for good/bad word immediately
+    if (word.type === 'Good') {
+      playSound('right_answer.mp3');
+    } else if (word.type === 'Bad') {
+      playSound('wrong_answer.mp3');
+    }
     if (!clickedIndices.includes(index) && !allGoodClicked) {
       setClickedIndices([...clickedIndices, index]);
       setSelectedWordIdx(index);

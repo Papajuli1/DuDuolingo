@@ -24,8 +24,6 @@ def register_step_routes(app):
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
 
-
-
 def reset_user_steps(username, language=None):
     conn = get_connection()
     cursor = conn.cursor()
@@ -49,6 +47,8 @@ def reset_user_steps(username, language=None):
             (username,)
         )
         print(f"SQL params: username={username}")
+    conn.commit()
+    conn.close()
     print(f"Rows affected: {cursor.rowcount}")
     conn.commit()
     conn.close()
