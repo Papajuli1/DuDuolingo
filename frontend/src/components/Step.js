@@ -280,7 +280,22 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
         Select all the words that you recognize in the image. You can use up to 2 hints, but each hint reduces your score.
       </div>
       <div className="step-header">
-        <h3 className="step-title">{stepData.language} Day {stepData.day}</h3>
+        <h3 className="step-title">
+          {stepData.language} Day {stepData.day}
+          {stepData.language === 'Spanish' && (
+            <img
+              src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f1ea-1f1f8.svg"
+              alt="Spanish flag"
+              style={{
+                width: '1.5em',
+                height: '1.5em',
+                verticalAlign: 'middle',
+                marginLeft: '8px',
+                filter: 'drop-shadow(0 0 2px #222)'
+              }}
+            />
+          )}
+        </h3>
         <span className={`step-level${stepData.completed ? ' step-level-completed' : ''}`}>
           {stepData.completed ? 'Completed' : 'In Progress'}
         </span>

@@ -108,19 +108,21 @@ const HomePage = () => {
           Leaderboard
         </button>
       </div>
-      <div className="bottom-sections">
-        <div className="section">
-          <h3>Learn</h3>
-          <p>Interactive lessons</p>
-        </div>
-        <div className="section">
-          <h3>Practice</h3>
-          <p>Daily exercises</p>
-        </div>
-        <div className="section">
-          <h3>Progress</h3>
-          <p>Track your journey</p>
-        </div>
+      {/* Replace the bottom-sections with a motivational banner */}
+      <div className="motivation-banner" style={{
+        width: '100%',
+        marginTop: '32px',
+        padding: '28px 0',
+        background: 'linear-gradient(90deg, #1cb0f6 0%, #2ecc40 100%)',
+        color: '#fff',
+        textAlign: 'center',
+        borderRadius: '18px',
+        fontSize: '1.25em',
+        fontWeight: '500',
+        boxShadow: '0 2px 16px rgba(0,0,0,0.10)'
+      }}>
+        🚀 Ready to level up your language skills? <br />
+        <span style={{fontWeight: 'bold', fontSize: '1.35em'}}>Practice daily, unlock achievements, and become a language master!</span>
       </div>
     </div>
   );

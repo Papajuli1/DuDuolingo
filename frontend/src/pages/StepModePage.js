@@ -184,6 +184,19 @@ const StepModePage = () => {
               >
                 <h3 className="stepmode-card-title">
                   Step {step.day} - {step.language}
+                  {step.language === 'Spanish' && (
+                    <img
+                      src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f1ea-1f1f8.svg"
+                      alt="Spanish flag"
+                      style={{
+                        width: '1.5em',
+                        height: '1.5em',
+                        verticalAlign: 'middle',
+                        marginLeft: '8px',
+                        filter: 'drop-shadow(0 0 2px #222)'
+                      }}
+                    />
+                  )}
                 </h3>
                 <p className="stepmode-card-level">
                   {isCompleted ? 'Completed' : 'In Progress'}

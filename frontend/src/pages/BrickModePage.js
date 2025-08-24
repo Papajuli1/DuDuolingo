@@ -240,24 +240,40 @@ const BrickModePage = () => {
       <div className="brickmode-header">
         <h1>Brick Mode</h1>
         <p>Choose a brick to practice with:</p>
-        <button 
-          className="brickmode-back-btn"
-          onClick={handleGoBack}
-        >
-          Back to Home
-        </button>
-        <button
-          className="brickmode-back-btn"
-          onClick={() => setLanguage(language === 'Spanish' ? 'German' : 'Spanish')}
-        >
-          Switch to {language === 'Spanish' ? 'German' : 'Spanish'}
-        </button>
-        <button
-          className="brickmode-back-btn"
-          onClick={handleResetProgress}
-        >
-          Reset Progress
-        </button>
+        <div className="brickmode-btn-row">
+          <button 
+            className="brickmode-back-btn brickmode-btn"
+            onClick={handleGoBack}
+          >
+            Back to Home
+          </button>
+          <button
+            className="brickmode-back-btn brickmode-btn"
+            onClick={() => setLanguage(language === 'Spanish' ? 'German' : 'Spanish')}
+          >
+            Switch to {language === 'Spanish' ? 'German' : 'Spanish'}
+            <img
+              src={language === 'Spanish'
+                ? 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f1e9-1f1ea.svg'
+                : 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f1ea-1f1f8.svg'
+              }
+              alt={language === 'Spanish' ? 'German flag' : 'Spanish flag'}
+              style={{
+                width: '1.2em',
+                height: '1.2em',
+                verticalAlign: 'middle',
+                marginLeft: '8px',
+                filter: 'drop-shadow(0 0 2px #222)'
+              }}
+            />
+          </button>
+          <button
+            className="brickmode-back-btn brickmode-btn"
+            onClick={handleResetProgress}
+          >
+            Reset Progress
+          </button>
+        </div>
       </div>
 
       {/* Group bricks by level and display each level in its own div */}
