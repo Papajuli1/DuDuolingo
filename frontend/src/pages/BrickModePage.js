@@ -306,59 +306,60 @@ const BrickModePage = () => {
                   const isPerfect = isCompleted && userBrick.score === 100;
                   const isPartial = isCompleted && userBrick.score < 100;
                   const showPressToStart = !isCompleted && isUnlocked;
-                  return (
+                    return (
                     <div
                       key={brick.group_id}
                       className={
-                        `brickmode-card` +
-                        (isPerfect ? ' brickmode-card-perfect' : '') +
-                        (isPartial ? ' brickmode-card-partial' : '') +
-                        (!isUnlocked ? ' brickmode-card-locked' : '')
+                      `brickmode-card` +
+                      (isPerfect ? ' brickmode-card-perfect' : '') +
+                      (isPartial ? ' brickmode-card-partial' : '') +
+                      (!isUnlocked ? ' brickmode-card-locked' : '')
                       }
                       onClick={isUnlocked ? () => handleBrickClick(brick) : undefined}
                       style={{ pointerEvents: isUnlocked ? 'auto' : 'none' }}
                       title={!isUnlocked ? 'Complete all previous bricks to unlock this level' : ''}
                     >
                       <h3 className="brickmode-card-title">
-                        {!isUnlocked && (
-                          <span style={{marginRight: '8px', verticalAlign: 'middle'}}>
-                            {/* ...existing lock SVG... */}
-                          </span>
-                        )}
-                        {brick.brick}
+                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap'}}>
+                          {!isUnlocked && (
+                            <span style={{fontSize: '1.2rem', opacity: 0.7}}>🔒</span>
+                          )}
+                          <span style={{fontSize: '1.3rem'}}>🧱</span>
+                          <span>{brick.brick}</span>
+                        </div>
                       </h3>
                       <p className="brickmode-card-level">
-                        Level {brick.level}
+                      Level {brick.level}
                       </p>
                       {!isUnlocked && (
-                        <p className="brickmode-card-locked-text" style={{color:'#888', fontSize:'0.95em', margin:'4px 0'}}>Locked</p>
+                      <p className="brickmode-card-locked-text" style={{color:'#888', fontSize:'0.95em', margin:'4px 0'}}>Locked</p>
                       )}
                       {brick.definition && (
-                        <p className="brickmode-card-def">
-                          {brick.definition.substring(0, 100)}...
-                        </p>
+                      <p className="brickmode-card-def">
+                        {brick.definition.substring(0, 100)}...
+                      </p>
                       )}
                       {/* Show completion status only if completed */}
                       {isPerfect && (
-                        <div className="brickmode-card-status brickmode-card-status-perfect">
-                          <span role="img" aria-label="perfect" style={{marginRight:'6px'}}>🏆</span>
-                          Perfect!
-                        </div>
+                      <div className="brickmode-card-status brickmode-card-status-perfect">
+                        <span role="img" aria-label="perfect" style={{marginRight:'6px'}}>🏆</span>
+                        Perfect!
+                      </div>
                       )}
                       {isPartial && (
-                        <div className="brickmode-card-status brickmode-card-status-partial">
-                          <span role="img" aria-label="partial" style={{marginRight:'6px'}}>✅</span>
-                          Completed
-                        </div>
+                      <div className="brickmode-card-status brickmode-card-status-partial">
+                        <span role="img" aria-label="partial" style={{marginRight:'6px'}}>✅</span>
+                        Completed
+                      </div>
                       )}
                       {/* Show "Press to start" for unlocked, not completed bricks */}
                       {showPressToStart && (
-                        <div className="brickmode-card-status" style={{color:'#1cb0f6', fontWeight:'bold', marginTop:'6px'}}>
-                          Press to start
-                        </div>
+                      <div className="brickmode-card-status" style={{color:'#1cb0f6', fontWeight:'bold', marginTop:'6px'}}>
+                        Press to start
+                      </div>
                       )}
                     </div>
-                  );
+                    );
                 })}
               </div>
             </div>

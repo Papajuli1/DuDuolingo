@@ -19,24 +19,32 @@
   90% { opacity: 1; }
   100% { opacity: 0; }
 }
+
 /* Logout button top right */
 .brickmode-logout-btn {
   position: absolute;
   top: 24px;
   right: 32px;
-  padding: 10px 24px;
-  font-size: 1rem;
-  background: linear-gradient(90deg, #58cc02 0%, #1cb0f6 100%);
+  padding: 12px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  border: none;
-  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
   z-index: 10;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
 .brickmode-logout-btn:hover {
-  background: linear-gradient(90deg, #1cb0f6 0%, #58cc02 100%);
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
+
 .brickmode-locked-message {
   background: #fff8e1;
   color: #b8860b;
@@ -50,129 +58,185 @@
   position: relative;
   z-index: 2;
 }
+
 .brickmode-level-section {
   margin-bottom: 40px;
-  padding: 20px 0;
-  border-bottom: 1px solid #eee;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
 .brickmode-level-title {
-  text-align: left;
-  font-size: 1.3rem;
-  color: #58cc02;
-  margin-bottom: 16px;
-  margin-left: 10px;
+  text-align: center;
+  font-size: 1.8rem;
+  color: white;
+  margin-bottom: 25px;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
+
 .brickmode-level-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
   gap: 20px;
-}
-.brickmode-card-locked {
-  background: #eee !important;
-  opacity: 0.6;
-  cursor: not-allowed;
-  border: 2px dashed #bbb;
-}
-.brickmode-card-locked-text {
-  color: #888;
-  font-weight: bold;
-}
-.brickmode-container {
-  padding: 40px 20px;
-}
-
-.brickmode-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.brickmode-back-btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #58cc02;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 20px;
-  margin-right: 10px;
-}
-
-.brickmode-home-btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #ccc;
-  color: black;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.brickmode-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
+  justify-items: center;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .brickmode-card {
-  border: 2px solid #ddd;
-  border-radius: 12px;
+  background: white;
+  border-radius: 18px;
   padding: 20px;
   cursor: pointer;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transition: all 0.4s ease;
+  width: 100%;
+  max-width: 250px;
+  min-height: 180px;
+  border: 3px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .brickmode-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-  transform: translateY(-2px);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .brickmode-card-title {
-  margin: 0 0 10px 0;
-  color: #333;
+  margin: 0 0 15px 0;
+  color: #047857;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .brickmode-card-level {
-  margin: 0 0 10px 0;
-  color: #666;
-  font-size: 0.9rem;
+  margin: 0 0 15px 0;
+  color: #065f46;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0.8;
 }
 
 .brickmode-card-def {
-  margin: 0;
-  color: #888;
-  font-size: 0.8rem;
+  margin: 0 0 15px 0;
+  color: #374151;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
 }
 
-.brickmode-loading,
-.brickmode-error,
-.brickmode-empty {
-  padding: 40px 20px;
+.brickmode-card-status {
   text-align: center;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.brickmode-card-locked {
+  background: rgba(200, 200, 200, 0.8) !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  border: 3px dashed #999 !important;
+}
+
+.brickmode-card-locked .brickmode-card-title {
   color: #666;
 }
 
-.brickmode-individual {
-  padding: 40px 20px;
+.brickmode-card-locked .brickmode-card-level {
+  color: #888;
 }
 
-.brickmode-individual-header {
-  margin-bottom: 20px;
+.brickmode-container {
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  min-height: 100vh;
 }
 
-.brickmode-card-completed {
-  border-color: #58cc02;
-  box-shadow: 0 0 8px #58cc02;
+.brickmode-header {
+  text-align: center;
+  margin-bottom: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  padding: 40px 30px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  max-width: 900px;
+  margin: 0 auto 40px auto;
 }
 
-.brickmode-card-level-completed {
-  color: #58cc02;
-  font-weight: bold;
+.brickmode-header h1 {
+  font-size: 2.8rem;
+  margin: 0 0 15px 0;
+  color: #047857;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.brickmode-header h1::before {
+  content: "🧱";
+  font-size: 2.5rem;
+}
+
+.brickmode-header p {
+  font-size: 1.3rem;
+  color: #065f46;
+  margin-bottom: 30px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.brickmode-btn-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 25px 0 0 0;
+  flex-wrap: wrap;
+}
+
+.brickmode-btn {
+  min-width: 180px;
+  padding: 16px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 15px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.brickmode-back-btn.brickmode-btn {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  color: white;
+}
+
+.brickmode-back-btn.brickmode-btn:hover {
+  background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(4, 120, 87, 0.4);
 }
 
 .brickmode-card-perfect {
@@ -180,6 +244,7 @@
   background: linear-gradient(90deg, #eaffd0 0%, #d0ffe7 100%);
   box-shadow: 0 0 8px #2ecc40a0;
 }
+
 .brickmode-card-status-perfect {
   color: #2ecc40;
   font-weight: bold;
@@ -191,26 +256,60 @@
   background: linear-gradient(90deg, #fffbe6 0%, #fff6d0 100%);
   box-shadow: 0 0 8px #f1c40fa0;
 }
+
 .brickmode-card-status-partial {
   color: #f1c40f;
   font-weight: bold;
   margin-top: 6px;
 }
-.brickmode-btn-row {
-  display: flex;
-  gap: 18px;
-  justify-content: center;
-  margin: 18px 0 12px 0;
+
+@media (max-width: 1200px) {
+  .brickmode-level-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
 }
 
-.brickmode-btn {
-  min-width: 160px;
-  padding: 10px 0;
-  font-size: 1em;
-  font-weight: 500;
-  border-radius: 15px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@media (max-width: 900px) {
+  .brickmode-level-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .brickmode-header {
+    padding: 30px 20px;
+    margin: 20px 20px 30px 20px;
+  }
+  
+  .brickmode-header h1 {
+    font-size: 2.3rem;
+  }
+  
+  .brickmode-header p {
+    font-size: 1.1rem;
+  }
+  
+  .brickmode-btn-row {
+    gap: 15px;
+  }
+  
+  .brickmode-btn {
+    min-width: 150px;
+    padding: 14px 16px;
+    font-size: 1rem;
+  }
+  
+  .brickmode-level-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brickmode-level-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 }

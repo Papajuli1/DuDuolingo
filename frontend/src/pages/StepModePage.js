@@ -61,10 +61,6 @@ const StepModePage = () => {
     setSelectedStep(null);
   };
 
-  const handleWordClick = (word, index) => {
-    // Optional: handle word click logic
-  };
-
   const handleResetProgress = async () => {
     const username = localStorage.getItem('username');
     if (!username) return;
@@ -100,6 +96,8 @@ const StepModePage = () => {
     setSelectedStep(null);
     fetchUserSteps();
   };
+
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   if (loading) {
     return (
@@ -140,7 +138,6 @@ const StepModePage = () => {
         </div>
         <Step
           stepData={selectedStep}
-          onWordClick={handleWordClick}
           onStepCompleted={handleStepCompleted}
         />
       </div>
@@ -154,59 +151,57 @@ const StepModePage = () => {
         <div className="stepmode-reset-msg">Progress has been reset!</div>
       )}
       <div className="stepmode-header">
-        <h1>Step Mode</h1>
-        <p>Choose a step to practice with:</p>
-        <button 
-          className="stepmode-back-btn"
-          onClick={handleGoBack}
-        >
-          Back to Home
-        </button>
-        <button
-          className="stepmode-back-btn"
-          onClick={handleResetProgress}
-        >
-          Reset Progress
-        </button>
+        <h1>The Haki Path</h1>
+        <p>Complete one step each day to master your Spanish skills!</p>
+        <div className="stepmode-btn-row">
+          <button 
+            className="stepmode-back-btn"
+            onClick={handleGoBack}
+          >
+            Back to Home
+          </button>
+          <button
+            className="stepmode-back-btn"
+            onClick={handleResetProgress}
+          >
+            Reset Progress
+          </button>
+        </div>
       </div>
-      <div className="stepmode-grid">
-        {steps
-          .filter(step => step.language === language)
-          .map((step, idx) => {
-            const userStep = userSteps.find(us => us.group_id === step.group_id);
-            const isCompleted = userStep && userStep.score && userStep.score !== 0;
-            return (
-              <div
-                key={step.group_id}
-                className={`stepmode-card${isCompleted ? ' stepmode-card-completed' : ''}`}
-                onClick={() => handleStepClick(step)}
-                style={{ pointerEvents: 'auto' }}
-              >
-                <h3 className="stepmode-card-title">
-                  Step {step.day} - {step.language}
-                  {step.language === 'Spanish' && (
-                    <img
-                      src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f1ea-1f1f8.svg"
-                      alt="Spanish flag"
-                      style={{
-                        width: '1.5em',
-                        height: '1.5em',
-                        verticalAlign: 'middle',
-                        marginLeft: '8px',
-                        filter: 'drop-shadow(0 0 2px #222)'
-                      }}
+      
+      <div className="stepmode-week-section">
+        <h2 className="stepmode-week-title">📅 Your Weekly Journey</h2>
+        <div className="stepmode-week-grid">
+          {steps
+            .filter(step => step.language === language)
+            .sort((a, b) => a.day - b.day)
+            .map((step, idx) => {
+              const userStep = userSteps.find(us => us.group_id === step.group_id);
+              const isCompleted = userStep && userStep.score && userStep.score !== 0;
+              const dayName = dayNames[step.day - 1] || `Day ${step.day}`;
+              
+              return (
+                <div
+                  key={step.group_id}
+                  className={`stepmode-day-card${isCompleted ? ' completed' : ''}`}
+                  onClick={() => handleStepClick(step)}
+                >
+                  <div className="stepmode-day-number">{step.day}</div>
+                  <div className="stepmode-day-name">{dayName}</div>
+                  <div className={`stepmode-day-status ${isCompleted ? 'completed' : 'pending'}`}>
+                    {isCompleted ? 'Completed' : 'Start Now'}
+                  </div>
+                  {step.image_url && (
+                    <img 
+                      src={step.image_url} 
+                      alt={`Day ${step.day}`} 
+                      className="stepmode-day-image" 
                     />
                   )}
-                </h3>
-                <p className="stepmode-card-level">
-                  {isCompleted ? 'Completed' : 'In Progress'}
-                </p>
-                {step.image_url && (
-                  <img src={step.image_url} alt={`Step ${step.day}`} className="stepmode-card-image" />
-                )}
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
+        </div>
       </div>
     </div>
   );
