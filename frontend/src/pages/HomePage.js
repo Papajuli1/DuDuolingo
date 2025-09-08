@@ -38,7 +38,7 @@ const HomePage = () => {
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">
-            <span className="hero-icon">🦉</span>
+            <img src="/DuDuolingo_icon.png" alt="DuDuolingo" className="hero-icon" />
             DuDuolingo
           </h1>
           <p className="hero-subtitle">

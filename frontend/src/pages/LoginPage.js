@@ -35,7 +35,10 @@ function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-box">
-        <h1 className="login-title">DuDuolingo</h1>
+        <h1 className="login-title">
+          <img src="/DuDuolingo_icon.png" alt="DuDuolingo" className="login-icon" />
+          DuDuolingo
+        </h1>
         <h2 className="login-subtitle">Login</h2>
         <form className="login-form" onSubmit={handleSubmit}>
           <input
