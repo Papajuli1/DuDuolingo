@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Brick.css';
 
-const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
+const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted, onBackToBricksList }) => {
   const [randomizedWords, setRandomizedWords] = useState([]);
   const [clickedIndices, setClickedIndices] = useState([]);
   const [selectedWordIdx, setSelectedWordIdx] = useState(null);
@@ -288,10 +288,27 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
   }
 
   return (
-    <div className="brick-container">
-      {/* Short explanation above the brick */}
-      <div className="brick-explanation">
-        Select all the words that you recognize in the image. You can use up to 2 hints, but each hint reduces your score.
+    <div>
+      {/* Top navigation buttons - outside the container like in Step */}
+        <div className="brick-nav-buttons">
+          <button className="brick-nav-button" onClick={() => {
+            if (onBackToBricksList) onBackToBricksList();
+          }}>
+            Back to Bricks List
+          </button>
+          <button className="brick-nav-button" onClick={() => window.location.href = '/'}>
+            Home
+          </button>
+        </div>
+        
+        <div className="brick-container">
+        <div className="brick-explanation">
+        <div className="brick-explanation-icon">🎯</div>
+        <div className="brick-explanation-text">
+          <strong>Your Task:</strong> Select all the words that you recognize in the image.
+          <br />
+          <span className="brick-explanation-hint">💡 You can use up to 2 hints, but each hint reduces your score by 20 points.</span>
+        </div>
       </div>
       <div className="brick-header">
         <h3 className="brick-title">{brickData.brick}</h3>
@@ -366,9 +383,11 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
 
       {selectedWordIdx !== null && randomizedWords[selectedWordIdx] && (
         <div className="word-definition">
-          <p>
-            <strong>{randomizedWords[selectedWordIdx].text}:</strong>
-            {" "}
+          <div className="word-definition-header">
+            <span className="word-definition-icon">📖</span>
+            <strong className="word-definition-title">{randomizedWords[selectedWordIdx].text}</strong>
+          </div>
+          <p className="word-definition-content">
             {randomizedWords[selectedWordIdx].definition
               ? randomizedWords[selectedWordIdx].definition
               : "No definition available."}
@@ -383,7 +402,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
             Score: {lockedScore !== null ? lockedScore : ''}
           </p>
           <button className="brick-success-btn" onClick={onContinue}>
-            Continue to the next Brick
+            Continue to the next brick
           </button>
         </div>
       )}
@@ -394,6 +413,7 @@ const Brick = ({ brickData, onWordClick, onContinue, onBrickCompleted }) => {
         </div>
       )}
     </div>
+  </div>
   );
 };
 

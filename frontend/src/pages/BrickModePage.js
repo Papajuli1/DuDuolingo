@@ -188,25 +188,12 @@ const BrickModePage = () => {
   if (selectedBrick) {
     return (
       <div className="brickmode-individual">
-        <div className="brickmode-individual-header">
-          <button 
-            className="brickmode-back-btn"
-            onClick={handleBackToBricksList}
-          >
-            Back to Bricks List
-          </button>
-          <button 
-            className="brickmode-home-btn"
-            onClick={handleGoBack}
-          >
-            Home
-          </button>
-        </div>
         <Brick
           brickData={selectedBrick}
           onWordClick={handleWordClick}
           onContinue={handleContinue}
           onBrickCompleted={(groupId, score) => handleBrickCompleted(groupId, score)}
+          onBackToBricksList={handleBackToBricksList}
         />
       </div>
     );

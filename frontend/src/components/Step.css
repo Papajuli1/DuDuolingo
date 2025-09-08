@@ -84,11 +84,12 @@
 
 .word-definition {
   margin: 15px 0;
-  padding: 12px;
-  background: #f0f0f0;
-  border-radius: 8px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
   border-left: 4px solid #58cc02;
   color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .step-success {
@@ -164,4 +165,57 @@
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(88,204,2,0.07);
   letter-spacing: 0.01em;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.step-explanation-icon {
+  font-size: 1.2em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.step-explanation-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.step-explanation-hint {
+  color: #228B22;
+  font-size: 0.95em;
+  font-weight: 400;
+}
+
+.word-definition {
+  margin: 15px 0;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border-left: 4px solid #58cc02;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.word-definition-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.word-definition-icon {
+  font-size: 1.1em;
+}
+
+.word-definition-title {
+  color: #58cc02;
+  font-size: 1.1em;
+}
+
+.word-definition-content {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+  font-size: 1em;
 }

@@ -263,6 +263,52 @@
   margin-top: 6px;
 }
 
+/* Individual brick view header styling */
+.brickmode-individual {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  padding: 20px;
+}
+
+.brickmode-individual-header {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.brickmode-individual-header .brickmode-back-btn,
+.brickmode-individual-header .brickmode-home-btn {
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.brickmode-individual-header .brickmode-back-btn:hover,
+.brickmode-individual-header .brickmode-home-btn:hover {
+  background: #f9fafb;
+  border-color: #58cc02;
+  color: #58cc02;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(88,204,2,0.15);
+}
+
+.brickmode-individual-header .brickmode-back-btn:active,
+.brickmode-individual-header .brickmode-home-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 @media (max-width: 1200px) {
   .brickmode-level-grid {
     grid-template-columns: repeat(4, 1fr);

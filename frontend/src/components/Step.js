@@ -277,7 +277,12 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
     <div className="step-container">
       {/* Instruction above the step */}
       <div className="step-explanation">
-        Select all the words that you recognize in the image. You can use up to 2 hints, but each hint reduces your score.
+        <div className="step-explanation-icon">🎯</div>
+        <div className="step-explanation-text">
+          <strong>Your Task:</strong> Select all the words that you recognize in the image.
+          <br />
+          <span className="step-explanation-hint">💡 You can use up to 2 hints, but each hint reduces your score by 20 points.</span>
+        </div>
       </div>
       <div className="step-header">
         <h3 className="step-title">
@@ -427,9 +432,11 @@ const Step = ({ stepData, onWordClick, onContinue, onStepCompleted }) => {
       </div>
       {selectedWordIdx !== null && randomizedWords[selectedWordIdx] && (
         <div className="word-definition">
-          <p>
-            <strong>{randomizedWords[selectedWordIdx].text}:</strong>
-            {" "}
+          <div className="word-definition-header">
+            <span className="word-definition-icon">📖</span>
+            <strong className="word-definition-title">{randomizedWords[selectedWordIdx].text}</strong>
+          </div>
+          <p className="word-definition-content">
             {randomizedWords[selectedWordIdx].definition
               ? randomizedWords[selectedWordIdx].definition
               : "No definition available."}

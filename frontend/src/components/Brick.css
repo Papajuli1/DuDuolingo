@@ -97,11 +97,35 @@
 
 .word-definition {
   margin: 15px 0;
-  padding: 12px;
-  background: #f0f0f0;
-  border-radius: 8px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
   border-left: 4px solid #58cc02;
   color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.word-definition-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.word-definition-icon {
+  font-size: 1.1em;
+}
+
+.word-definition-title {
+  color: #58cc02;
+  font-size: 1.1em;
+}
+
+.word-definition-content {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+  font-size: 1em;
 }
 
 .brick-success {
@@ -171,4 +195,63 @@
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(88,204,2,0.07);
   letter-spacing: 0.01em;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.brick-explanation-icon {
+  font-size: 1.2em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.brick-explanation-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.brick-explanation-hint {
+  color: #228B22;
+  font-size: 0.95em;
+  font-weight: 400;
+}
+
+/* Top navigation buttons styling - matching Step design */
+.brick-nav-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 20px 0 0 0;
+}
+
+.brick-nav-button {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  text-align: center;
+}
+
+.brick-nav-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.brick-nav-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
